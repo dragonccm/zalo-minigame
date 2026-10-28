@@ -1,0 +1,87 @@
+/* Chủ đề Halloween — chỉ có hiệu lực khi <html class="halloween"> (theme.js tự bật theo lịch). */
+html.halloween {
+  --bg: #140b22; --bg2: #1d1230; --card: #1f1533; --card2: #2c1d47; --line: rgba(255, 170, 90, 0.16);
+  --accent: #ffa24c; --accent2: #ff7a1a; --hi: #b77dff; --good: #3fcf8e; --bad: #ff6b6b; --warn: #ffb547;
+  --text: #f6eeff; --muted: #b9a8d4; --soft: rgba(255, 255, 255, 0.05); --soft2: rgba(255, 255, 255, 0.09);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35); color-scheme: dark;
+  --hw-orange-soft: rgba(255, 122, 26, 0.16); --hw-orange-text: #ffb36b;
+}
+
+/* ---- bầu trời đêm: trăng + sao + dơi ---- */
+html.halloween body {
+  background:
+    radial-gradient(120px 120px at 88% 70px, #fff3c4 0%, #ffd77a 38%, rgba(255, 200, 90, 0.25) 52%, transparent 70%),
+    radial-gradient(900px 520px at 85% -10%, rgba(183, 125, 255, 0.28) 0%, transparent 65%),
+    radial-gradient(700px 420px at 0% 110%, rgba(255, 122, 26, 0.18) 0%, transparent 70%),
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 32% 8%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 58% 22%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 72% 40%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 22% 46%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 46% 64%, #fff 50%, transparent 51%),
+    linear-gradient(180deg, #1a0e2e 0%, #140b22 45%, #0e0718 100%);
+  background-attachment: fixed;
+}
+html.halloween body::before {   /* đàn dơi bay chậm ngang trời */
+  content: ""; position: fixed; z-index: 0; pointer-events: none; top: 76px; left: 0; width: 100%; height: 140px; opacity: 0.55;
+  background-repeat: no-repeat;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 32'%3E%3Cpath d='M32 9c1.5-3 3.5-3 4 1 6-6 15-6 22 2-6-1-10 2-11 6-3-3-8-2-10 2-2-2-3-4-5-4s-3 2-5 4c-2-4-7-5-10-2-1-4-5-7-11-6 7-8 16-8 22-2 .5-4 2.5-4 4-1z' fill='%23080410'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 32'%3E%3Cpath d='M32 9c1.5-3 3.5-3 4 1 6-6 15-6 22 2-6-1-10 2-11 6-3-3-8-2-10 2-2-2-3-4-5-4s-3 2-5 4c-2-4-7-5-10-2-1-4-5-7-11-6 7-8 16-8 22-2 .5-4 2.5-4 4-1z' fill='%23080410'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 32'%3E%3Cpath d='M32 9c1.5-3 3.5-3 4 1 6-6 15-6 22 2-6-1-10 2-11 6-3-3-8-2-10 2-2-2-3-4-5-4s-3 2-5 4c-2-4-7-5-10-2-1-4-5-7-11-6 7-8 16-8 22-2 .5-4 2.5-4 4-1z' fill='%23080410'/%3E%3C/svg%3E");
+  background-size: 46px 23px, 30px 15px, 22px 11px;
+  background-position: 70% 20px, 76% 56px, 64% 80px;
+  animation: hw-bats 38s linear infinite;
+}
+@keyframes hw-bats {
+  0% { background-position: 108% 30px, 112% 64px, 104% 86px; }
+  50% { background-position: 50% 6px, 56% 40px, 46% 70px; }
+  100% { background-position: -8% 34px, -12% 62px, -4% 96px; }
+}
+@media (prefers-reduced-motion: reduce) { html.halloween body::before { animation: none; } }
+html.halloween #view, html.halloween #foot { position: relative; z-index: 1; }
+
+/* bí ngô ở chân trang */
+html.halloween #foot {
+  padding-top: 56px; border-top-color: rgba(255, 122, 26, 0.25);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M33 16c-1-6 3-10 8-10' stroke='%234f8a3a' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Cellipse cx='20' cy='40' rx='14' ry='18' fill='%23e8640c'/%3E%3Cellipse cx='44' cy='40' rx='14' ry='18' fill='%23e8640c'/%3E%3Cellipse cx='32' cy='40' rx='13' ry='20' fill='%23ff8a2b'/%3E%3Cpath d='M21 36l5-6 5 6zM33 36l5-6 5 6z' fill='%23ffd27a'/%3E%3Cpath d='M21 45q11 9 22 0l-4 1-2 3-3-3-3 3-2-3-3 3-2-3z' fill='%23ffd27a'/%3E%3C/svg%3E") center 10px / 40px 40px no-repeat;
+}
+
+/* ---- header ---- */
+html.halloween #top { background: rgba(20, 11, 34, 0.82); border-bottom-color: rgba(255, 122, 26, 0.22); }
+html.halloween .logo b, html.halloween .logo-mark { color: var(--accent2); }
+html.halloween .logo::after {   /* bí ngô nhỏ cạnh logo */
+  content: ""; display: inline-block; width: 22px; height: 22px; margin-left: 6px; vertical-align: -3px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M33 16c-1-6 3-10 8-10' stroke='%234f8a3a' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Cellipse cx='20' cy='40' rx='14' ry='18' fill='%23e8640c'/%3E%3Cellipse cx='44' cy='40' rx='14' ry='18' fill='%23e8640c'/%3E%3Cellipse cx='32' cy='40' rx='13' ry='20' fill='%23ff8a2b'/%3E%3Cpath d='M21 36l5-6 5 6zM33 36l5-6 5 6z' fill='%23ffd27a'/%3E%3Cpath d='M21 45q11 9 22 0l-4 1-2 3-3-3-3 3-2-3-3 3-2-3z' fill='%23ffd27a'/%3E%3C/svg%3E") center / contain no-repeat;
+  animation: hw-bob 2.6s ease-in-out infinite;
+}
+@keyframes hw-bob { 50% { transform: translateY(-2px) rotate(-6deg); } }
+@media (prefers-reduced-motion: reduce) { html.halloween .logo::after { animation: none; } }
+html.halloween #nav a.active { background: var(--hw-orange-soft); color: var(--hw-orange-text); }
+html.halloween #searchInput, html.halloween .userchip { background: var(--card); }
+html.halloween .userchip:hover { background: var(--hw-orange-soft); }
+html.halloween .lvl { color: #1a0b00; background: #ffb547; }
+
+/* ---- nút, ô nhập ---- */
+html.halloween .btn { background: var(--card2); }
+html.halloween .btn:hover { background: var(--hw-orange-soft); border-color: rgba(255, 122, 26, 0.5); }
+html.halloween .btn.primary, html.halloween .btn.primary:hover {
+  background: linear-gradient(180deg, #ff9a3c, #e8590c); color: #1f0d00; box-shadow: 0 4px 16px rgba(255, 110, 20, 0.35); }
+html.halloween input[type=text], html.halloween input[type=password], html.halloween input[type=search],
+html.halloween textarea, html.halloween select, html.halloween select option { background: #170f27; }
+html.halloween input:focus, html.halloween textarea:focus, html.halloween select:focus { box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.2); }
+html.halloween pre, html.halloween .logbox { background: #170f27; }
+
+/* ---- trang chủ ---- */
+html.halloween .chip { background: var(--card); }
+html.halloween .chip.on { background: var(--accent2); color: #1f0d00; box-shadow: 0 3px 12px rgba(255, 110, 20, 0.4); }
+html.halloween .gcard:hover { box-shadow: 0 14px 34px rgba(255, 110, 20, 0.22), 0 0 0 1px rgba(255, 122, 26, 0.45); }
+html.halloween .playbtn { background: var(--accent2); color: #1f0d00; box-shadow: 0 8px 24px rgba(255, 110, 20, 0.45); }
+html.halloween .tag { background: var(--hw-orange-soft); color: var(--hw-orange-text); }
+html.halloween .thumb { background: linear-gradient(135deg, #2a1645, #6b2fa8 55%, #ff7a1a); }
+
+/* ---- các khối khác ---- */
+html.halloween .ach .ic, html.halloween .taskic, html.halloween .emoji-pick button.on,
+html.halloween .iconpick button.on, html.halloween .tk-item:hover { background: var(--hw-orange-soft); }
+html.halloween .tk-item, html.halloween .iconpick button, html.halloween .toast { background: var(--card); }
+html.halloween .banner, html.halloween .tk-reward, html.halloween .report.warn, html.halloween .tk-test {
+  background: rgba(255, 181, 71, 0.12); color: #ffd08a; border-color: rgba(255, 181, 71, 0.4); }
+html.halloween .modal { background: rgba(5, 2, 12, 0.66); }
+html.halloween .bar > i { background: linear-gradient(90deg, #b77dff, #ff7a1a); }
