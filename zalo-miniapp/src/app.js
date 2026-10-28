@@ -1,6 +1,6 @@
 // Bản thử nghiệm: kiểm tra 5 điều kiện để GameHub chạy được trong Zalo Mini App.
 // Kết quả + thông tin môi trường hiển thị trên màn hình — bấm "Sao chép kết quả" để gửi lại cho đội phát triển.
-import { getAccessToken, getSystemInfo, getUserID, getUserInfo } from 'zmp-sdk/apis';
+import { getAccessToken, getIDToken, getSystemInfo, getUserID, getUserInfo } from 'zmp-sdk/apis';
 import './style.css';
 
 // Zalo không dùng index.html của dự án (chỉ nạp JS/CSS khai báo trong app-config.json) nên tự dựng giao diện ở đây.
@@ -117,6 +117,22 @@ async function run() {
     }), 15000, 'game gửi tin nhắn SDK');
     c5.ok(`game đã tải và gửi "${msg}" qua SDK`);
   } catch (e) { c5.bad(`${errText(e)} — iframe bị chặn (frame-ancestors / Zalo không cho nhúng?)`); }
+
+  // 6. ID token: nếu là JWT có chữ ký, máy chủ ở nước ngoài có thể xác minh người dùng mà không cần gọi Graph API (bị chặn -501).
+  // Chỉ hiện phần đầu + tên các trường, không hiện nội dung cá nhân.
+  const c6 = check('6. ID token (xác minh không cần Graph API)');
+  try {
+    const t = await withTimeout(getIDToken(), 10000, 'getIDToken');
+    if (!t) throw new Error('getIDToken trả về rỗng');
+    const parts = String(t).split('.');
+    if (parts.length !== 3) { c6.bad(`không phải JWT (${parts.length} phần, dài ${String(t).length})`); }
+    else {
+      const dec = x => JSON.parse(decodeURIComponent(escape(atob(x.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(x.length / 4) * 4, '=')))));
+      const h = dec(parts[0]), p = dec(parts[1]);
+      const pick = k => (p[k] === undefined ? undefined : String(p[k]).slice(0, 60));
+      c6.ok(`JWT header=${JSON.stringify(h)} · trường=${Object.keys(p).join(',')} · iss=${pick('iss')} · aud=${pick('aud')} · exp=${pick('exp')}`);
+    }
+  } catch (e) { c6.bad(errText(e)); }
 
   await showEnv();
   $('run').disabled = false;
