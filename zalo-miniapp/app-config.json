@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "GameHub",
-    "headerTitle": "GameHub — kiểm tra",
+    "title": "Logthink Game Center",
+    "headerTitle": "Logthink Game Center",
     "headerColor": "#1843EF",
     "textColor": "white",
     "textAlign": "left",
@@ -9,7 +9,11 @@
     "leftButton": "back"
   },
   "debug": false,
-  "listCSS": [],
-  "listSyncJS": [],
+  "listCSS": [
+    "assets/app.css"
+  ],
+  "listSyncJS": [
+    "assets/app.js"
+  ],
   "listAsyncJS": []
 }

@@ -22,21 +22,23 @@ Mở app trong Zalo, bấm **Chạy kiểm tra**, đọc 5 dòng kết quả r�
 
 ## Chạy
 
+Zalo **không dùng `index.html`** của dự án: nó tự sinh trang và nạp các file khai báo trong `app-config.json`
+(`assets/app.css`, `assets/app.js`). Vì vậy `vite.config.js` build ra một file JS dạng IIFE tên cố định và giao diện được dựng bằng JS.
+Chưa deploy mà mở Mini App trong Zalo sẽ thấy trang **404 Not Found (nginx)**.
+
 ```bash
 cd zalo-miniapp
 npm install
 
-# xem trên trình duyệt máy tính (bước 2 sẽ lỗi vì không ở trong Zalo — bình thường)
+# xem trên trình duyệt máy tính (bước 2 lỗi vì không ở trong Zalo — bình thường)
 GAMEHUB_API=http://localhost:8080 npm run dev
 
-# liên kết với Mini App ID: chọn "Use ZMP to deploy only", thư mục build là dist
-zmp init
+# đăng nhập tài khoản nhà phát triển (quét QR bằng Zalo) và nhập Mini App ID — lưu vào .env
+npm run login
 
-# chạy trên điện thoại thật: quét QR bằng Zalo
-GAMEHUB_API=https://game.ten-mien-cua-ban.vn zmp start -D
-
-# đưa lên Zalo (bản thử nghiệm, chưa công khai)
-GAMEHUB_API=https://game.ten-mien-cua-ban.vn npm run build && zmp deploy
+# build + đưa lên Zalo (mặc định trỏ tới https://gamecenter.logthinks.com)
+npm run deploy          # bản Development
+npm run deploy:test     # bản Testing
 ```
 
-`GAMEHUB_API` được gắn vào lúc build — đổi máy chủ thì build lại.
+Đổi máy chủ: `GAMEHUB_API=https://... npm run deploy` (địa chỉ được gắn vào lúc build).

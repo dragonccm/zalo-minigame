@@ -1,11 +1,24 @@
 // Bản thử nghiệm: kiểm tra 5 điều kiện để GameHub chạy được trong Zalo Mini App.
 // Kết quả + thông tin môi trường hiển thị trên màn hình — bấm "Sao chép kết quả" để gửi lại cho đội phát triển.
 import { getAccessToken, getSystemInfo, getUserID } from 'zmp-sdk/apis';
+import './style.css';
+
+// Zalo không dùng index.html của dự án (chỉ nạp JS/CSS khai báo trong app-config.json) nên tự dựng giao diện ở đây.
+const MARKUP = `<main>
+  <h1>Kiểm tra GameHub trên Zalo</h1>
+  <p class="muted">Máy chủ: <code id="api"></code></p>
+  <button id="run">Chạy kiểm tra</button>
+  <ol id="checks"></ol>
+  <h2>Thông tin môi trường</h2>
+  <pre id="env"></pre>
+  <button id="copy" class="ghost">Sao chép kết quả</button>
+  <h2>Game trong iframe</h2>
+  <div class="frame"><iframe id="game" title="Game thử" sandbox="allow-scripts allow-pointer-lock"></iframe></div>
+</main>`;
 
 const API = __GAMEHUB_API__.replace(/\/$/, '');
 const GAME = 'chess';
 const $ = id => document.getElementById(id);
-$('api').textContent = API;
 
 const results = [];
 function check(name) {
@@ -113,10 +126,17 @@ async function showEnv() {
   $('env').textContent = JSON.stringify(env, null, 2);
 }
 
-$('run').onclick = run;
-$('copy').onclick = async () => {
-  const text = results.map(r => `[${r.status}] ${r.name}: ${r.note}`).join('\n') + '\n\n' + $('env').textContent;
-  try { await navigator.clipboard.writeText(text); $('copy').textContent = 'Đã sao chép'; }
-  catch { $('copy').textContent = 'Không sao chép được — chụp màn hình giúp nhé'; }
-};
-showEnv();
+// Zalo có thể nạp script trong <head> — chờ có <body> rồi mới dựng giao diện
+function boot() {
+  const root = document.getElementById('app') || document.body.appendChild(document.createElement('div'));
+  root.innerHTML = MARKUP;
+  $('api').textContent = API;
+  $('run').onclick = run;
+  $('copy').onclick = async () => {
+    const text = results.map(r => `[${r.status}] ${r.name}: ${r.note}`).join('\n') + '\n\n' + $('env').textContent;
+    try { await navigator.clipboard.writeText(text); $('copy').textContent = 'Đã sao chép'; }
+    catch { $('copy').textContent = 'Không sao chép được — chụp màn hình giúp nhé'; }
+  };
+  showEnv();
+}
+if (document.body) boot(); else document.addEventListener('DOMContentLoaded', boot);

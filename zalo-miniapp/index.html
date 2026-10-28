@@ -4,20 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GameHub — kiểm tra Zalo</title>
-<link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
-<main>
-  <h1>Kiểm tra GameHub trên Zalo</h1>
-  <p class="muted">Máy chủ: <code id="api"></code></p>
-  <button id="run">Chạy kiểm tra</button>
-  <ol id="checks"></ol>
-  <h2>Thông tin môi trường</h2>
-  <pre id="env"></pre>
-  <button id="copy" class="ghost">Sao chép kết quả</button>
-  <h2>Game trong iframe</h2>
-  <div class="frame"><iframe id="game" title="Game thử" sandbox="allow-scripts allow-pointer-lock"></iframe></div>
-</main>
+<!-- Chỉ dùng khi chạy "npm run dev". Trong Zalo, trang do Zalo sinh ra và nạp assets/app.js + assets/app.css (xem app-config.json). -->
+<div id="app"></div>
 <script type="module" src="./src/app.js"></script>
 </body>
 </html>

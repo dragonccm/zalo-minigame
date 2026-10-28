@@ -7,13 +7,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "zmp start",
-    "deploy": "zmp deploy"
+    "deploy": "vite build && zmp deploy -e -o dist",
+    "deploy:test": "vite build && zmp deploy -e -t -o dist",
+    "login": "zmp login"
   },
   "dependencies": {
     "zmp-sdk": "2.53.3"
   },
   "devDependencies": {
-    "vite": "6.3.5"
+    "vite": "6.3.5",
+    "zmp-cli": "^4.0.5"
   }
 }
