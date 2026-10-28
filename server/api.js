@@ -206,6 +206,7 @@ route('POST', '/api/auth/login', async ctx => {
 const ZALO_GRAPH_URL = process.env.ZALO_GRAPH_URL || 'https://graph.zalo.me/v2.0/me';
 async function zaloProfile(accessToken) {
   const headers = { access_token: accessToken };
+  if (process.env.ZALO_PROXY_KEY) headers['x-proxy-key'] = process.env.ZALO_PROXY_KEY;   // gọi qua zalo-proxy đặt ở Việt Nam
   if (process.env.ZALO_APP_SECRET) {
     headers.appsecret_proof = crypto.createHmac('sha256', process.env.ZALO_APP_SECRET).update(accessToken).digest('hex');
   }

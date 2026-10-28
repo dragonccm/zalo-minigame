@@ -11,3 +11,4 @@ Dockerfile
 .dockerignore
 *.log
 zalo-miniapp
+zalo-proxy
