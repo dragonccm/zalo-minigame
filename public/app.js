@@ -371,32 +371,31 @@ function makeFrame(game, entryUrl, wrapper) {
 // ---------- trang chủ ----------
 const home = { category: '', q: '', sort: 'popular' };
 const gameCard = g => `<a class="gcard" href="#/game/${esc(g.slug)}">
-  <div class="thumb">${g.thumbnail ? `<img src="${esc(g.thumbnail)}" alt="" loading="lazy">` : ic('gamepad-2')}</div>
+  <div class="thumb">${g.thumbnail ? `<img src="${esc(g.thumbnail)}" alt="" loading="lazy">` : ic('gamepad-2')}<span class="playbtn">${ic('play')} Chơi</span></div>
   <div class="body"><h3>${esc(g.name)}</h3><p class="desc">${esc(g.description)}</p>
   <div class="meta"><span>${g.categories.slice(0, 2).map(c => `<span class="tag">${esc(CAT[c] || c)}</span>`).join('')}</span><span>${ic('play')} ${num(g.plays)}</span></div></div></a>`;
 
+// Trang chủ chỉ tập trung vào game: bộ lọc gọn trên cùng, lưới game, bảng xếp hạng thu nhỏ bên dưới
 async function homePage() {
   const [{ games, categories }, top] = await Promise.all([api('/api/games'), api('/api/leaderboard/global')]);
   const used = categories.filter(c => games.some(g => g.categories.includes(c)));
   view.innerHTML = `
-    <section class="hero"><div><h1>Chơi game HTML5 miễn phí ${ic('gamepad-2')}</h1>
-      <p>Đăng nhập để lưu điểm, thành tựu và tiến trình. Bạn là nhà phát triển? Đăng game của bạn theo chuẩn GameHub để mọi người cùng chơi.</p></div>
-      <span class="spacer"></span><a class="btn primary" href="#/upload">${ic('upload')} Đăng game</a></section>
-    <div class="grid2"><div>
-      <div class="chips" id="chips"></div>
-      <div class="row" style="margin-bottom:14px"><span class="muted small" id="count"></span><span class="spacer"></span>
-        <select id="sort" style="width:auto"><option value="popular">Phổ biến nhất</option><option value="new">Mới nhất</option></select></div>
-      <div class="cards" id="cards"></div></div>
-      <aside class="panel"><h3>${ic('trophy')} Top người chơi</h3><ul class="lb">${top.entries.length ? top.entries.slice(0, 10).map(e => `
-        <li><span class="rk">${e.rank}</span><span class="avatar">${av(e.user.avatar)}</span><a class="nm" href="#/u/${esc(e.user.username)}">${esc(e.user.displayName)}</a>
-        <span class="sc">${num(e.xp)} XP</span></li>`).join('') : '<li class="muted">Chưa có ai</li>'}</ul></aside></div>`;
+    <div class="hometop"><div class="chips" id="chips"></div>
+      <select id="sort" aria-label="Sắp xếp"><option value="popular">Phổ biến nhất</option><option value="new">Mới nhất</option></select></div>
+    <p class="muted small" id="count" hidden></p>
+    <div class="cards" id="cards"></div>
+    ${top.entries.length ? `<section class="toprow"><h3>${ic('trophy')} Top người chơi</h3><ol>${top.entries.slice(0, 5).map(e => `
+      <li><span class="rk">${e.rank}</span><span class="avatar">${av(e.user.avatar)}</span><a class="nm" href="#/u/${esc(e.user.username)}">${esc(e.user.displayName)}</a>
+      <span class="sc">${num(e.xp)} XP</span></li>`).join('')}</ol></section>` : ''}`;
   const draw = () => {
+    $('#chips').hidden = used.length < 2;
     $('#chips').innerHTML = `<button class="chip ${home.category ? '' : 'on'}" data-c="">Tất cả</button>` +
       used.map(c => `<button class="chip ${home.category === c ? 'on' : ''}" data-c="${c}">${esc(CAT[c] || c)}</button>`).join('');
     let list = games.filter(g => (!home.category || g.categories.includes(home.category)) &&
       (!home.q || (g.name + ' ' + g.description + ' ' + g.author).toLowerCase().includes(home.q.toLowerCase())));
     list = [...list].sort(home.sort === 'new' ? (a, b) => b.createdAt - a.createdAt : (a, b) => b.plays - a.plays);
-    $('#count').textContent = `${list.length} game${home.q ? ` cho "${home.q}"` : ''}`;
+    $('#count').hidden = !home.q;
+    $('#count').textContent = `${list.length} game cho "${home.q}"`;
     $('#cards').innerHTML = list.length ? list.map(gameCard).join('') : '<p class="muted">Không tìm thấy game phù hợp.</p>';
   };
   $('#sort').value = home.sort;
