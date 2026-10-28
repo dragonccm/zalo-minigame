@@ -4,3 +4,4 @@ node_modules/
 .env
 backups/
 k8s/secret.yaml
+.env.dokploy
