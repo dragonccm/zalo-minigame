@@ -200,6 +200,8 @@ route('POST', '/api/auth/login', async ctx => {
 });
 
 // Zalo Mini App: client gửi access token lấy từ zmp-sdk getAccessToken(); máy chủ hỏi Graph API của Zalo để biết ID người dùng.
+// Chỉ xin "id": Zalo từ chối trả thông tin cá nhân (tên, ảnh) cho máy chủ đặt ngoài Việt Nam (lỗi -501).
+// Tên hiển thị do client gửi kèm (lấy bằng getUserInfo) — chỉ dùng khi tạo tài khoản, người chơi tự sửa được.
 // Trả về token phiên để client gửi qua header Authorization (không dùng cookie).
 const ZALO_GRAPH_URL = process.env.ZALO_GRAPH_URL || 'https://graph.zalo.me/v2.0/me';
 async function zaloProfile(accessToken) {
@@ -209,7 +211,7 @@ async function zaloProfile(accessToken) {
   }
   let r;
   try {
-    const res = await fetch(`${ZALO_GRAPH_URL}?fields=id,name`, { headers, signal: AbortSignal.timeout(8000) });
+    const res = await fetch(`${ZALO_GRAPH_URL}?fields=id`, { headers, signal: AbortSignal.timeout(8000) });
     r = await res.json();
   } catch (e) {
     console.error('[zalo] graph:', e.message);
@@ -217,9 +219,9 @@ async function zaloProfile(accessToken) {
   }
   if (!r || r.error || !/^\d{1,32}$/.test(String(r.id || ''))) {
     if (r && r.error) console.warn('[zalo] graph lỗi:', r.error, r.message);
-    throw new HttpError(401, 'Phiên Zalo không hợp lệ');
+    throw new HttpError(401, 'Phiên Zalo không hợp lệ', r && r.error ? { zaloError: Number(r.error) || String(r.error).slice(0, 20) } : undefined);
   }
-  return { id: String(r.id), name: typeof r.name === 'string' ? r.name : '' };
+  return { id: String(r.id) };
 }
 
 route('POST', '/api/auth/zalo', async ctx => {
@@ -231,7 +233,7 @@ route('POST', '/api/auth/zalo', async ctx => {
   let u = await one('SELECT * FROM users WHERE zalo_id = $1', [z.id]);
   if (!u) {
     const username = 'z_' + sha(z.id).slice(0, 12);
-    const display = z.name.replace(/[\u0000-\u001f]/g, '').trim().slice(0, 24) || 'Người chơi';
+    const display = String(b.displayName || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 24) || 'Người chơi';
     u = await one(`INSERT INTO users (username, display_name, pass_hash, zalo_id) VALUES ($1, $2, '!', $3)
       ON CONFLICT (zalo_id) WHERE zalo_id IS NOT NULL DO UPDATE SET zalo_id = EXCLUDED.zalo_id RETURNING *`, [username, display, z.id]);
   }

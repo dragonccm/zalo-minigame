@@ -19,7 +19,9 @@ const graph = http.createServer((req, res) => {
   seen.push({ tok, proof: req.headers.appsecret_proof, url: req.url });
   const m = /^good-(\d+)$/.exec(tok);
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify(m ? { id: m[1], name: `Zalo User ${m[1].slice(-4)}`, error: 0, message: 'Success' } : { error: 452, message: 'Session key invalid' }));
+  // giống Zalo khi máy chủ ở nước ngoài: xin trường cá nhân (name, picture) → lỗi -501
+  if (m && /fields=[^&]*(name|picture)/.test(req.url)) return res.end(JSON.stringify({ error: -501, message: 'Personal information is limited due to IP address not inside Vietnam' }));
+  res.end(JSON.stringify(m ? { id: m[1], error: 0, message: 'Success' } : { error: 452, message: 'Session key invalid' }));
 });
 
 async function call(method, path, { body, token, origin = ORIGIN, headers = {} } = {}) {
@@ -51,19 +53,22 @@ async function call(method, path, { body, token, origin = ORIGIN, headers = {} }
 
   console.log('[Đăng nhập Zalo]');
   const bad = await call('POST', '/api/auth/zalo', { body: { accessToken: 'expired-token' } });
-  ok(bad.status === 401, 'Token Zalo sai → 401', bad);
+  ok(bad.status === 401 && bad.data.zaloError === 452, 'Token Zalo sai → 401 kèm mã lỗi Zalo', bad.data);
   const empty = await call('POST', '/api/auth/zalo', { body: {} });
   ok(empty.status === 400, 'Thiếu token → 400', empty.status);
-  const r1 = await call('POST', '/api/auth/zalo', { body: { accessToken: `good-${zid}` } });
+  const r1 = await call('POST', '/api/auth/zalo', { body: { accessToken: `good-${zid}`, displayName: `Zalo User ${zid.slice(-4)}<b>` } });
   ok(r1.status === 200 && /^[a-f0-9]{64}$/.test(r1.data.token || ''), 'Token đúng → tạo tài khoản + trả token phiên', r1.data);
-  ok(r1.data.user && /^z_[a-f0-9]{12}$/.test(r1.data.user.username) && r1.data.user.displayName === `Zalo User ${zid.slice(-4)}`, 'Tài khoản dùng tên Zalo, username tự sinh', r1.data.user);
+  ok(r1.data.user && /^z_[a-f0-9]{12}$/.test(r1.data.user.username) && r1.data.user.displayName === `Zalo User ${zid.slice(-4)}b`, 'Tên hiển thị lấy từ client (đã lọc), username tự sinh', r1.data.user);
   ok(!r1.headers.get('set-cookie'), 'Không đặt cookie (Mini App dùng header)');
   const last = seen[seen.length - 1];
   ok(last && last.proof === crypto.createHmac('sha256', 'zsecret').update(`good-${zid}`).digest('hex'), 'Gửi appsecret_proof đúng cho Graph API', last);
-  ok(last && /fields=id,name/.test(last.url), 'Chỉ xin id + tên từ Zalo');
+  ok(last && /fields=id$/.test(last.url), 'Chỉ xin id từ Zalo (không xin thông tin cá nhân)', last && last.url);
 
-  const r2 = await call('POST', '/api/auth/zalo', { body: { accessToken: `good-${zid}` } });
+  const r2 = await call('POST', '/api/auth/zalo', { body: { accessToken: `good-${zid}`, displayName: 'Tên Khác' } });
   ok(r2.status === 200 && r2.data.user.id === r1.data.user.id && r2.data.token !== r1.data.token, 'Đăng nhập lại → cùng tài khoản, phiên mới');
+  ok(r2.data.user.displayName === r1.data.user.displayName, 'Đăng nhập lại không ghi đè tên đã có');
+  const r3 = await call('POST', '/api/auth/zalo', { body: { accessToken: `good-9${zid}` } });
+  ok(r3.status === 200 && r3.data.user.displayName === 'Người chơi', 'Không gửi tên → "Người chơi"', r3.data.user);
 
   console.log('[Token phiên qua header]');
   const me = await call('GET', '/api/me', { token: r1.data.token });

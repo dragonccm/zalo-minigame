@@ -1,6 +1,6 @@
 // Bản thử nghiệm: kiểm tra 5 điều kiện để GameHub chạy được trong Zalo Mini App.
 // Kết quả + thông tin môi trường hiển thị trên màn hình — bấm "Sao chép kết quả" để gửi lại cho đội phát triển.
-import { getAccessToken, getSystemInfo, getUserID } from 'zmp-sdk/apis';
+import { getAccessToken, getSystemInfo, getUserID, getUserInfo } from 'zmp-sdk/apis';
 import './style.css';
 
 // Zalo không dùng index.html của dự án (chỉ nạp JS/CSS khai báo trong app-config.json) nên tự dựng giao diện ở đây.
@@ -41,7 +41,7 @@ async function api(path, opts = {}) {
   if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(API + path, { method: opts.method || 'GET', headers, body: opts.body && JSON.stringify(opts.body) });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`${res.status} ${data.error || ''}`.trim());
+  if (!res.ok) throw new Error(`${res.status} ${data.error || ''}${data.zaloError !== undefined ? ` (mã Zalo ${data.zaloError})` : ''}`.trim());
   return data;
 }
 
@@ -67,7 +67,10 @@ async function run() {
   try {
     const at = await withTimeout(getAccessToken(), 15000, 'getAccessToken');
     if (!at) throw new Error('getAccessToken trả về rỗng (đang chạy ngoài Zalo?)');
-    const d = await withTimeout(api('/api/auth/zalo', { method: 'POST', body: { accessToken: at } }), 15000, 'POST /api/auth/zalo');
+    // Tên lấy ở client: máy chủ đặt ngoài Việt Nam không được Zalo trả thông tin cá nhân. Người dùng có thể từ chối — vẫn đăng nhập được.
+    let displayName = '';
+    try { displayName = (await withTimeout(getUserInfo({ autoRequestPermission: true }), 20000, 'getUserInfo')).userInfo.name || ''; } catch { /* không cho phép tên */ }
+    const d = await withTimeout(api('/api/auth/zalo', { method: 'POST', body: { accessToken: at, displayName } }), 15000, 'POST /api/auth/zalo');
     token = d.token;
     c2.ok(`Tài khoản ${d.user.username} — "${d.user.displayName}"`);
   } catch (e) { c2.bad(errText(e)); }
