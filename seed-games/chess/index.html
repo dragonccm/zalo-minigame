@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Cờ Vua</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <section id="table">
+    <div class="pbar" id="barTop"><span class="pav" data-av></span><div class="pinfo"><b data-name>Máy</b><span class="caps" data-caps></span></div><span class="clock hidden" data-clock>5:00</span></div>
+    <div id="boardWrap">
+      <div id="board" aria-label="Bàn cờ"></div>
+      <div id="promo" class="hidden"></div>
+      <div id="thinking" class="hidden"><span class="spin"></span> Máy đang nghĩ...</div>
+    </div>
+    <div class="pbar" id="barBottom"><span class="pav" data-av></span><div class="pinfo"><b data-name>Bạn</b><span class="caps" data-caps></span></div><span class="clock hidden" data-clock>5:00</span></div>
+  </section>
+  <aside id="side">
+    <div class="sidehead"><span id="modeLabel">Chơi với máy</span><span class="spacer"></span><span id="statusText"></span></div>
+    <ol id="moves"></ol>
+    <div id="offer" class="hidden"></div>
+    <div class="tools" id="tools">
+      <button id="bUndo" title="Đi lại"><i data-ic="undo-2"></i><span>Đi lại</span></button>
+      <button id="bHint" title="Gợi ý nước đi"><i data-ic="lightbulb"></i><span>Gợi ý <small id="hintLeft"></small></span></button>
+      <button id="bDraw" title="Xin hòa"><i data-ic="handshake"></i><span>Xin hòa</span></button>
+      <button id="bResign" title="Đầu hàng"><i data-ic="flag"></i><span>Đầu hàng</span></button>
+      <button id="bFlip" title="Lật bàn cờ"><i data-ic="refresh-cw"></i><span>Lật bàn</span></button>
+      <button id="bSound" title="Âm thanh"><i data-ic="volume-2"></i><span>Âm thanh</span></button>
+      <button id="bMenu" title="Về menu"><i data-ic="house"></i><span>Menu</span></button>
+    </div>
+  </aside>
+</div>
+
+<!-- menu chính -->
+<div id="menu" class="overlay">
+  <div class="mcard">
+    <div class="mhead"><img data-pc="kw" alt=""><div><h1>Cờ Vua</h1><p>Đấu máy 5 cấp độ · đấu online · hai người một máy</p></div><img data-pc="qb" alt=""></div>
+    <button id="mResume" class="big ghost hidden"><i data-ic="play"></i> Tiếp tục ván đang dở</button>
+    <div class="mode">
+      <div class="mtitle"><i data-ic="bot"></i> Chơi với máy</div>
+      <div class="seg" id="levels"></div>
+      <div class="row2"><span class="lbl">Cầm quân</span><div class="seg small" id="colors">
+        <button data-c="w">Trắng</button><button data-c="r" class="on">Ngẫu nhiên</button><button data-c="b">Đen</button></div></div>
+      <button id="mAI" class="big primary"><i data-ic="play"></i> Bắt đầu</button>
+    </div>
+    <div class="mode" id="onlineBox">
+      <div class="mtitle"><i data-ic="globe"></i> Chơi online</div>
+      <button id="mQuick" class="big primary blue"><i data-ic="swords"></i> Ghép trận nhanh <small>5 phút +3 giây</small></button>
+      <div class="row2"><span class="lbl">Phòng riêng</span><div class="seg small" id="tcs"></div></div>
+      <div class="row2"><button id="mCreate" class="ghost"><i data-ic="users"></i> Tạo phòng</button>
+        <input id="mCode" maxlength="6" placeholder="MÃ PHÒNG" autocomplete="off"><button id="mJoin" class="ghost">Vào</button></div>
+      <div id="netMsg" class="small muted"></div>
+    </div>
+    <div class="mode">
+      <div class="mtitle"><i data-ic="users"></i> Hai người một máy</div>
+      <button id="mLocal" class="big ghost"><i data-ic="play"></i> Chơi trên cùng thiết bị</button>
+    </div>
+    <div class="mfoot"><span id="mStats"></span><span class="spacer"></span><label class="tog"><input type="checkbox" id="optHints" checked> Hiện nước đi hợp lệ</label>
+      <div class="seg tiny" id="themes"><button data-t="wood" class="on">Gỗ</button><button data-t="green">Xanh</button><button data-t="slate">Tím</button></div></div>
+  </div>
+</div>
+
+<!-- chờ đối thủ online -->
+<div id="wait" class="overlay hidden">
+  <div class="mcard center"><span class="spin big"></span><h2 id="waitTitle">Đang tìm đối thủ...</h2><p id="waitText" class="muted"></p>
+    <div id="waitCode" class="code hidden"></div><button id="wCancel" class="ghost">Hủy</button></div>
+</div>
+
+<!-- kết thúc ván -->
+<div id="over" class="overlay hidden">
+  <div class="mcard center">
+    <div id="overIcon" class="oicon"></div><h2 id="overTitle">Bạn thắng!</h2><p id="overReason" class="muted"></p>
+    <p id="overScore" class="score"></p>
+    <div class="btns"><button id="oAgain" class="primary">Chơi lại</button><button id="oReview" class="ghost">Xem lại bàn cờ</button><button id="oMenu" class="ghost">Menu</button></div>
+    <button id="oReward" class="reward hidden"></button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="gamehub-sdk.js"></script>
+<script src="icons.js"></script>
+<script src="pieces.js"></script>
+<script src="chess-rules.js"></script>
+<script src="chess-ai.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

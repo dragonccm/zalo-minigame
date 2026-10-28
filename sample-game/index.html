@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Click Rush</title>
+<style>
+.icon { width: 1.1em; height: 1.1em; vertical-align: -0.2em; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #120d2b; color: #fff; font-family: system-ui, sans-serif; user-select: none; touch-action: none; }
+  canvas { display: block; width: 100%; height: 100%; }
+  #ui { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; background: rgba(18, 13, 43, .85); }
+  #ui.hidden { display: none; }
+  button { padding: 14px 34px; font-size: 20px; font-weight: 800; border: 0; border-radius: 14px; background: #ffd23f; color: #2a1f00; cursor: pointer; }
+  h1 { margin: 0; font-size: 44px; } p { margin: 0; color: #b9b0e6; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui"><h1><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12a10 10 0 1 0 20 0a10 10 0 1 0 -20 0"/><path d="M6 12a6 6 0 1 0 12 0a6 6 0 1 0 -12 0"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/></svg> Click Rush</h1><p id="msg">Bấm trúng mục tiêu trong 30 giây!</p><p id="who"></p><button id="go">CHƠI</button><button id="dbl" hidden style="background:#5df09a"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 7v14"/><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5"/><path d="M4 7h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1Z"/></svg> Làm nhiệm vụ: x2 điểm</button></div>
+
+<script src="gamehub-sdk.js"></script>
+<script>
+(async function () {
+  // 1) Khởi tạo SDK: biết người chơi là ai, đã đăng nhập hay chưa
+  const info = await GameHub.init();
+  document.getElementById('who').textContent = info.player.guest
+    ? 'Bạn đang chơi với tư cách khách — đăng nhập để lưu điểm'
+    : `Xin chào ${info.player.avatar} ${info.player.displayName}`;
+
+  // 2) Đọc dữ liệu đã lưu (null nếu khách / chưa có)
+  const save = (await GameHub.load()) || { runs: 0 };
+
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  const ui = document.getElementById('ui'), msg = document.getElementById('msg');
+  let W, H, targets = [], score = 0, hits = 0, combo = 0, timeLeft = 0, running = false, paused = false;
+  const resize = () => { W = cv.width = innerWidth; H = cv.height = innerHeight; };
+  addEventListener('resize', resize); resize();
+
+  function spawn() {
+    const r = 22 + Math.random() * 26;
+    targets.push({ x: r + Math.random() * (W - 2 * r), y: 70 + r + Math.random() * (H - 140 - 2 * r), r, life: 1.6, max: 1.6, hue: Math.random() * 360 });
+  }
+  function start() {
+    targets = []; score = hits = combo = 0; timeLeft = 30; running = true; ui.classList.add('hidden'); dbl.hidden = true;
+    GameHub.gameStart();                              // 3) báo bắt đầu lượt chơi
+  }
+  async function end() {
+    running = false; save.runs++; GameHub.save(save);   // 4) lưu tiến trình
+    if (score >= 100) GameHub.unlockAchievement('score_100');
+    if (hits >= 1 && save.runs === 1) GameHub.unlockAchievement('first_run');
+    msg.textContent = `Hết giờ! ${score} điểm — ${hits} lần trúng`;
+    ui.classList.remove('hidden');
+    const r = await GameHub.gameOver({ score, meta: { hits } });   // 5) gửi điểm + kết thúc lượt
+    if (r.score && r.score.saved) msg.textContent += ` · hạng #${r.score.rank}`;
+    dbl.hidden = score <= 0;
+  }
+  // 7) Nhiệm vụ nhận thưởng: người chơi làm nhiệm vụ (xem live, đọc bài viết...) để nhân đôi điểm
+  const dbl = document.getElementById('dbl');
+  dbl.onclick = async () => {
+    const r = await GameHub.requestReward('double_score');
+    if (!r.rewarded) { if (r.reason === 'cooldown') msg.textContent = `Thử lại sau ${r.retryAfterSec} giây`; return; }
+    score *= r.reward.amount; dbl.hidden = true;
+    msg.innerHTML = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 7v14"/><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5"/><path d="M4 7h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1Z"/></svg> Đã nhân đôi: ${score} điểm`;
+    const s = await GameHub.submitScore(score, { hits, doubled: true });
+    if (s.saved) msg.insertAdjacentText('beforeend', ` · hạng #${s.rank}`);
+  };
+  function pointer(e) {
+    if (!running || paused) return;
+    const rect = cv.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (W / rect.width), y = (e.clientY - rect.top) * (H / rect.height);
+    for (let i = targets.length - 1; i >= 0; i--) {
+      const t = targets[i];
+      if ((x - t.x) ** 2 + (y - t.y) ** 2 <= t.r ** 2) {
+        targets.splice(i, 1); hits++; combo++; score += 10 + Math.min(combo, 10);
+        if (hits === 10) GameHub.unlockAchievement('ten_hits');
+        return;
+      }
+    }
+    combo = 0;
+  }
+  cv.addEventListener('pointerdown', pointer);
+  document.getElementById('go').onclick = start;
+  GameHub.on('pause', () => { paused = true; });     // portal báo tab bị ẩn
+  GameHub.on('resume', () => { paused = false; last = performance.now(); });
+
+  let last = performance.now(), spawnAcc = 0;
+  (function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (running && !paused) {
+      timeLeft -= dt; spawnAcc += dt;
+      if (spawnAcc > 0.55) { spawnAcc = 0; spawn(); }
+      for (const t of targets) t.life -= dt;
+      const before = targets.length; targets = targets.filter(t => t.life > 0);
+      if (targets.length < before) combo = 0;
+      if (timeLeft <= 0) end();
+    }
+    ctx.clearRect(0, 0, W, H);
+    for (const t of targets) {
+      ctx.beginPath(); ctx.arc(t.x, t.y, t.r * (0.4 + 0.6 * t.life / t.max), 0, 7);
+      ctx.fillStyle = `hsl(${t.hue} 85% 60%)`; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke();
+    }
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 26px system-ui';
+    ctx.fillText(`Điểm: ${score}`, 18, 40); ctx.textAlign = 'right'; ctx.fillText(`${Math.max(0, Math.ceil(timeLeft))}s`, W - 18, 40); ctx.textAlign = 'left';
+    requestAnimationFrame(loop);
+  })(performance.now());
+
+  GameHub.ready();                                    // 6) báo đã tải xong
+})();
+</script>
+</body>
+</html>

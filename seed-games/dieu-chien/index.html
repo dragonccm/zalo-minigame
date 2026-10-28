@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Diều Chiến</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hud" class="hidden">
+  <div class="hbox"><span class="lv" id="hMap">Map 1</span><span class="sc" id="hScore">0</span></div>
+  <div class="hbox gold"><i data-ic="coins"></i><b id="hGold">0</b></div>
+  <div class="hbox orbs" title="Ngọc skill — gom đủ để mở cổng sang map mới"><i data-ic="gem"></i><b id="hOrbs">0/5</b></div>
+  <div class="hbox lives" id="hLives"></div>
+  <span class="spacer"></span>
+  <button class="rb" id="hPause" title="Tạm dừng (Esc)"><i data-ic="pause"></i></button>
+</div>
+<div id="powers"></div>
+<div id="lb" class="hidden"><h4><i data-ic="trophy"></i> <span id="lbTitle">Bảng xếp hạng</span></h4><ol id="lbList"></ol></div>
+<canvas id="mini" class="hidden" width="180" height="120"></canvas>
+<button id="boostBtn" class="hidden" title="Tăng tốc"><i data-ic="zap"></i><span class="st"><i id="stamina"></i></span></button>
+<div id="tip" class="hidden"></div>
+<div id="duel" class="hidden">
+  <div class="dhead"><i data-ic="swords"></i> ĐẤU TAY ĐÔI <span class="dtime" id="duelTime">8</span></div>
+  <div class="drow"><span class="dname"><i class="dot" id="duelMeC"></i> Bạn</span>
+    <div class="dbar"><i id="duelFill"></i><span class="mid"></span></div>
+    <span class="dname r"><span id="duelOpp">Đối thủ</span> <i class="dot" id="duelOppC"></i></span></div>
+  <div class="dcall">Bấm liên tục!<small>chuột · Space · chạm màn hình</small></div>
+</div>
+
+<!-- menu -->
+<div id="menu" class="ov">
+  <div class="card">
+    <div class="logo"><canvas id="logoKite" width="120" height="120"></canvas><div><h1>Diều Chiến</h1><p>Bay lượn tự do — ăn vàng, nhặt phép, hạ đối thủ, mở cổng sang map mới!</p></div></div>
+    <div class="stats"><span><i data-ic="trophy"></i> Kỷ lục <b id="mBest">0</b></span><span><i data-ic="map"></i> Map xa nhất <b id="mMax">1</b></span><span><i data-ic="coins"></i> <b id="mCoins">0</b> xu</span></div>
+    <button id="bOnline" class="big primary blue"><i data-ic="globe"></i> Chơi online</button>
+    <button id="bPlay" class="big ghost"><i data-ic="bot"></i> Chơi với bot (offline)</button>
+    <div class="row room"><button id="bCreate" class="ghost"><i data-ic="users"></i> Tạo phòng riêng</button><input id="roomCode" maxlength="6" placeholder="MÃ PHÒNG" autocomplete="off"><button id="bJoin" class="ghost">Vào</button></div>
+    <div id="netMsg" class="small netmsg"></div>
+    <div class="row"><button id="bShop" class="ghost"><i data-ic="shopping-cart"></i> Cửa hàng</button><button id="bHow" class="ghost"><i data-ic="circle-help"></i> Cách chơi</button>
+      <button id="bCoins" class="ghost reward"><i data-ic="gift"></i> Nhiệm vụ: +100 xu</button></div>
+    <div class="row small"><label class="tog"><input type="checkbox" id="optSound" checked> Âm thanh</label></div>
+  </div>
+</div>
+
+<!-- cách chơi -->
+<div id="how" class="ov hidden">
+  <div class="card wide">
+    <h2><i data-ic="circle-help"></i> Cách chơi</h2>
+    <div class="tips">
+      <div><i data-ic="mouse-pointer-click"></i><p><b>Di chuột / chạm màn hình</b> để lái diều. <b>Giữ chuột, Space</b> hoặc nút <b>tia sét</b> để tăng tốc (tốn thể lực).</p></div>
+      <div><i data-ic="coins"></i><p>Ăn <b>vàng</b> để có điểm và xu mua đồ. Vàng to giá trị gấp 5.</p></div>
+      <div><i data-ic="gem"></i><p>Gom đủ <b>ngọc skill</b> thì <b>cổng</b> mở ra (mũi tên chỉ đường) — bay vào để sang <b>map mới</b>.</p></div>
+      <div><i data-ic="swords"></i><p><b>Đấu tay đôi</b>: hai diều chạm nhau là vào vòng đấu — <b>bấm chuột / Space / chạm màn hình thật nhanh</b> để kéo thanh lực về phía mình. Kéo hết thanh (hoặc dẫn trước khi hết 8 giây) là thắng, đối thủ bị hạ và rơi vàng, ngọc. Không ai xen vào được vòng đấu.</p></div>
+      <div><i data-ic="sword"></i><p><b>Kiếm</b>: mỗi lần bấm khi đấu mạnh gấp 1.8 lần. <b>Lá chắn</b>: thua đấu chỉ vỡ khiên. <b>Tàng hình</b>: không bị kéo vào đấu.</p></div>
+      <div><i data-ic="shield"></i><p><b>Tăng tốc</b> bay nhanh hơn · <b>Tàng hình</b> đối thủ không thấy bạn · <b>Nam châm</b> hút vàng · <b>x2</b> nhân đôi vàng.</p></div>
+      <div><i data-ic="cloud-lightning"></i><p>Map sau có <b>đàn chim</b>, <b>mây giông</b> (sét đánh — né vùng đỏ) và <b>luồng gió</b> đẩy diều.</p></div>
+    </div>
+    <button class="big primary" data-close><i data-ic="check"></i> Đã hiểu</button>
+  </div>
+</div>
+
+<!-- cửa hàng -->
+<div id="shop" class="ov hidden">
+  <div class="card wide">
+    <div class="shead"><h2><i data-ic="shopping-cart"></i> Cửa hàng</h2><span class="spacer"></span><span class="coins"><i data-ic="coins"></i> <b id="sCoins">0</b></span><button class="rb" data-close><i data-ic="x"></i></button></div>
+    <h3>Nâng cấp</h3><div id="ups" class="ups"></div>
+    <h3>Mẫu diều</h3><div id="skins" class="skins"></div>
+  </div>
+</div>
+
+<!-- giới thiệu map -->
+<div id="intro" class="ov hidden clear">
+  <div class="banner"><small id="iSmall">MAP 1</small><h2 id="iTitle">Cánh đồng lúa</h2><p id="iText"></p></div>
+</div>
+
+<!-- qua map -->
+<div id="won" class="ov hidden">
+  <div class="card center">
+    <div class="big-ic good"><i data-ic="door-open"></i></div><h2 id="wTitle">Qua map 1!</h2>
+    <div class="lines" id="wLines"></div>
+    <div class="row"><button id="wShop" class="ghost"><i data-ic="shopping-cart"></i> Cửa hàng</button><button id="wNext" class="big primary"><i data-ic="play"></i> Map tiếp theo</button></div>
+  </div>
+</div>
+
+<!-- thua -->
+<div id="lost" class="ov hidden">
+  <div class="card center">
+    <div class="big-ic bad"><i data-ic="sword"></i></div><h2 id="lTitle">Hết mạng!</h2><p id="lText" class="muted"></p>
+    <p class="score"><span>Điểm</span><b id="lScore">0</b><em id="lRank"></em></p>
+    <button id="lRevive" class="big reward"><i data-ic="gift"></i> Làm nhiệm vụ: +1 mạng, chơi tiếp</button>
+    <div class="row"><button id="lMenu" class="ghost"><i data-ic="house"></i> Menu</button><button id="lAgain" class="big primary"><i data-ic="rotate-ccw"></i> Chơi lại từ đầu</button></div>
+  </div>
+</div>
+
+<!-- tạm dừng -->
+<div id="pause" class="ov hidden">
+  <div class="card center"><h2><i data-ic="pause"></i> Tạm dừng</h2>
+    <p id="pCode" class="muted hidden"></p>
+    <div class="row"><button id="pQuit" class="ghost"><i data-ic="house"></i> Bỏ cuộc</button><button id="pGo" class="big primary"><i data-ic="play"></i> Tiếp tục</button></div></div>
+</div>
+
+<script src="gamehub-sdk.js"></script>
+<script src="icons.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

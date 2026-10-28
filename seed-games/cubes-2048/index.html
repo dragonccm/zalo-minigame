@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#120d2b">
+<title>Cubes 2048 Arena</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="speed"></div>
+<div id="danger"></div>
+<div id="labels"></div>
+<div id="flash"></div>
+
+<div id="hud" class="hidden">
+  <div id="scorebox" class="glass">
+    <div class="small">ĐIỂM</div>
+    <div id="scoreVal">0</div>
+    <div class="chips">
+      <span class="chip" title="Khối lớn nhất của bạn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg> <b id="chipHead">2</b></span>
+      <span class="chip" title="Thứ hạng"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg> <b id="chipRank">#1</b></span>
+    </div>
+    <div class="small best">Kỷ lục <span id="bestVal">0</span></div>
+  </div>
+  <div id="tools">
+    <button id="mute" class="round" title="Bật/tắt âm thanh"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg></button>
+    <button id="gear" class="round" title="Cài đặt (Esc)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/></svg></button>
+    <button id="fs" class="round" title="Toàn màn hình"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+  </div>
+  <div id="lb" class="glass">
+    <h3><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg> Bảng xếp hạng</h3>
+    <ol id="lbList"></ol>
+  </div>
+  <div id="feed"></div>
+  <div id="netBadge" class="hidden"></div>
+  <canvas id="mini" class="glass" width="140" height="140"></canvas>
+  <div id="fx"></div>
+  <button id="adBtn" class="ad"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 7v14"/><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5"/><path d="M4 7h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1Z"/></svg> Nhiệm vụ: Siêu sức mạnh</button>
+  <div id="boostWrap">
+    <div id="boostBar"><div id="boostFill"></div><span id="boostText">SẴN SÀNG</span></div>
+    <div class="small hint">Giữ chuột trái / Space để tăng tốc</div>
+  </div>
+  <button id="boostBtn" class="hidden"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg></button>
+</div>
+
+<div id="menu" class="overlay">
+  <div class="menugrid">
+    <section class="panel hero">
+      <div class="tiles" aria-hidden="true"><i>2</i><i>4</i><i>8</i><i>16</i><i>32</i></div>
+      <h1><span>Cubes</span> 2048<small>.arena</small></h1>
+      <p class="tag">Rắn khối 3D · Hợp nhất số · Nuốt đối thủ</p>
+      <input id="nameInput" maxlength="12" placeholder="Nhập tên của bạn" autocomplete="off">
+    </section>
+    <section class="panel playcard">
+      <button id="playOnline" class="primary hidden"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12a10 10 0 1 0 20 0a10 10 0 1 0 -20 0"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> CHƠI ONLINE</button>
+      <button id="playBtn" class="primary"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg> CHƠI NGAY</button>
+      <div id="roomRow" class="roomrow hidden">
+        <button id="createRoom" class="ghost"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/></svg> Tạo phòng riêng</button>
+        <input id="roomCode" maxlength="6" placeholder="Mã phòng" autocomplete="off">
+        <button id="joinRoom" class="ghost">Vào</button>
+      </div>
+      <div id="netStatus" class="small netstatus"></div>
+      <div class="btnrow">
+        <button id="adStart" class="ad"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 7v14"/><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5"/><path d="M4 7h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1Z"/></svg> Nhiệm vụ: Khởi đầu mạnh</button>
+        <button id="menuSettings" class="ghost"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/></svg> Cài đặt</button>
+      </div>
+      <div class="menubest"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg> Kỷ lục của bạn: <b id="menuBest">0</b></div>
+    </section>
+    <section class="panel skincard">
+      <div class="small skin-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><path d="M13 6.5a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0"/><path d="M17 10.5a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0"/><path d="M6 12.5a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0"/><path d="M8 7.5a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0"/></svg> CHỌN SKIN</div>
+      <div class="skins" id="skinsMenu"></div>
+    </section>
+    <section class="panel howcard">
+      <div class="small skin-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 11L10 11"/><path d="M8 9L8 13"/><path d="M15 12L15.01 12"/><path d="M18 10L18.01 10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg> CÁCH CHƠI</div>
+      <div class="howto">
+        <div><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2h0a7 7 0 0 1 7 7v6a7 7 0 0 1 -7 7h0a7 7 0 0 1 -7 -7v-6a7 7 0 0 1 7 -7Z"/><path d="M12 6v4"/></svg></span><p><b>Di chuột</b> để lái<br><b>Giữ chuột trái / Space</b> tăng tốc</p></div>
+        <div><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-16a2 2 0 0 1 2 -2Z"/><path d="M12 18h.01"/></svg></span><p><b>Kéo ngón tay</b> để lái<br><b>Chạm 2 lần rồi giữ</b> / nút <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg></p></div>
+        <div><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2Z"/></svg></span><p>Nhặt khối <b>cùng số</b> để hợp nhất<br>2+2=4, 4+4=8…</p></div>
+        <div><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m13 19 6-6"/><path d="M14.5 17.5 3.586 6.586A2 2 0 013 5.172V3h2.172a2 2 0 011.414.586L17.5 14.5"/><path d="m14.828 6.172 2.586-2.586A2 2 0 0118.828 3H21v2.172a2 2 0 01-.586 1.414l-2.586 2.586"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/><path d="m5 14 4 4"/><path d="m5 21-2-2"/><path d="M7.5 16.5 4 20"/></svg></span><p>Chạm khối <b>nhỏ hơn</b> để nuốt<br>chạm khối <b>lớn hơn</b> là thua</p></div>
+        <div><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 6a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M5 12L19 12"/><path d="M11 18a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg></span><p>Tránh khối đỏ <b>÷2</b><br>(chia đôi số của bạn)</p></div>
+        <div><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span><p><b>Khiên</b> bảo vệ · <b>Nam châm</b> hút khối</p></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="over" class="overlay hidden">
+  <div class="panel">
+    <h2>Bạn đã bị nuốt!</h2>
+    <p id="overBy" class="tag"></p>
+    <div class="bigscore"><span class="small">ĐIỂM</span><b id="overScore">0</b><span id="overNew" class="newbest hidden"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg> KỶ LỤC MỚI!</span></div>
+    <p id="overRank" class="tag" style="margin:0 0 10px"></p>
+    <div class="stats">
+      <div><span class="small">KHỐI LỚN NHẤT</span><b id="overMax">2</b></div>
+      <div><span class="small">ĐÃ NUỐT</span><b id="overKills">0</b></div>
+      <div><span class="small">SỐNG SÓT</span><b id="overTime">0s</b></div>
+      <div><span class="small">KỶ LỤC</span><b id="overBest">0</b></div>
+    </div>
+    <div class="small skin-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><path d="M13 6.5a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0"/><path d="M17 10.5a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0"/><path d="M6 12.5a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0"/><path d="M8 7.5a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0"/></svg> ĐỔI SKIN</div>
+    <div class="skins" id="skinsOver"></div>
+    <button id="adRevive" class="ad wide"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 7v14"/><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5"/><path d="M4 7h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1Z"/></svg> Làm nhiệm vụ: Hồi sinh với khối lớn nhất</button>
+    <button id="againBtn" class="primary">↻ CHƠI LẠI</button>
+    <div class="btnrow"><button id="overSettings" class="ghost"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/></svg> Cài đặt</button><button id="leaveBtn" class="ghost hidden"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Rời phòng online</button></div>
+  </div>
+</div>
+
+<div id="settings" class="overlay hidden">
+  <div class="panel">
+    <h2 class="sh"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/></svg> Cài đặt</h2>
+    <div class="group">Âm thanh &amp; hình ảnh</div>
+    <div class="row"><label for="sVol">Âm lượng</label><input id="sVol" type="range" min="0" max="100" step="5"><output id="sVolV"></output></div>
+    <div class="row"><label for="sFx">Hiệu ứng</label>
+      <select id="sFx"><option value="0">Tắt</option><option value="1">Vừa</option><option value="2">Cao</option></select></div>
+    <div class="row"><label for="sRes">Đồ họa</label>
+      <select id="sRes"><option value="0">Thấp (mượt)</option><option value="1">Vừa</option><option value="2">Cao (nét)</option></select></div>
+    <div class="row"><label for="sShake">Rung màn hình</label><input id="sShake" type="checkbox"></div>
+    <div class="group">Điều khiển &amp; trận đấu</div>
+    <div class="row"><label for="sSens">Độ nhạy lái</label><input id="sSens" type="range" min="60" max="160" step="10"><output id="sSensV"></output></div>
+    <div class="row"><label for="sBots">Số bot</label><input id="sBots" type="range" min="4" max="18" step="1"><output id="sBotsV"></output></div>
+    <div class="group">Giao diện</div>
+    <div class="row"><label for="sNames">Hiện tên người chơi</label><input id="sNames" type="checkbox"></div>
+    <div class="row"><label for="sMini">Hiện minimap</label><input id="sMini" type="checkbox"></div>
+    <div class="btnrow">
+      <button id="sReset" class="ghost">Mặc định</button>
+      <button id="sClose" class="primary slim">XONG</button>
+    </div>
+  </div>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script src="gamehub-sdk.js"></script>
+<script src="icons.js"></script>
+<script src="boot.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Áp dụng tất cả:  kubectl apply -k k8s/
+# Đổi phiên bản image:  sửa newTag bên dưới rồi apply lại.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: gamehub
+resources:
+  - namespace.yaml
+  - secret.yaml          # tạo từ secret.example.yaml — KHÔNG commit file này
+  - postgres.yaml
+  - gamehub.yaml
+  - ingress.yaml
+  - backup-cronjob.yaml
+images:
+  - name: gamehub
+    newName: gamehub      # nếu dùng registry: ghcr.io/<tên-bạn>/gamehub
+    newTag: "1.0.0"

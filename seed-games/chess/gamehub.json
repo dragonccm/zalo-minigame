@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "id": "chess",
+  "name": "Cờ Vua",
+  "version": "1.0.0",
+  "description": "Cờ vua đầy đủ luật (nhập thành, bắt tốt qua đường, phong cấp, hòa). Đấu máy 5 cấp độ, đấu online có đồng hồ — máy chủ kiểm tra từng nước đi — hoặc hai người chơi trên cùng thiết bị.",
+  "author": "GameHub",
+  "sdk": "1.0",
+  "entry": "index.html",
+  "thumbnail": "thumb.png",
+  "categories": ["board", "strategy"],
+  "orientation": "both",
+  "controls": ["mouse", "touch"],
+  "permissions": ["save", "leaderboard", "achievements", "rewards", "multiplayer"],
+  "scoring": { "label": "Điểm cờ", "order": "desc", "max": 5000 },
+  "multiplayer": { "mode": "authoritative", "maxPlayers": 2, "minPlayers": 2, "privateRooms": true },
+  "rewards": [
+    { "placement": "hints", "name": "3 lượt gợi ý", "description": "Máy chỉ cho bạn nước đi tốt khi đấu với máy", "reward": { "type": "hints", "amount": 3 }, "cooldownSec": 30, "dailyLimit": 10 }
+  ],
+  "achievements": [
+    { "key": "first_win", "name": "Ván thắng đầu", "description": "Thắng máy lần đầu tiên", "icon": "trophy", "points": 10 },
+    { "key": "beat_lv3", "name": "Kỳ thủ", "description": "Thắng máy ở cấp Vừa trở lên", "icon": "medal", "points": 20 },
+    { "key": "beat_lv5", "name": "Hạ Kiện tướng", "description": "Thắng máy ở cấp Kiện tướng", "icon": "crown", "points": 50 },
+    { "key": "clean_win", "name": "Không cần trợ giúp", "description": "Thắng máy (cấp Dễ trở lên) mà không đi lại hay xem gợi ý", "icon": "sparkles", "points": 20 },
+    { "key": "quick_mate", "name": "Chớp nhoáng", "description": "Chiếu hết máy trong 20 nước", "icon": "zap", "points": 25 },
+    { "key": "promote", "name": "Phong cấp", "description": "Đưa một quân tốt về cuối bàn để phong cấp", "icon": "star", "points": 10 },
+    { "key": "en_passant", "name": "Bắt tốt qua đường", "description": "Thực hiện nước bắt tốt qua đường", "icon": "footprints", "points": 15 },
+    { "key": "online_win", "name": "Cao thủ online", "description": "Thắng một ván online", "icon": "globe", "points": 30 }
+  ]
+}

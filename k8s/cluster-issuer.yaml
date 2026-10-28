@@ -1,0 +1,16 @@
+# Áp dụng riêng 1 lần sau khi cài cert-manager (dùng chung cho cả cụm, không thuộc namespace gamehub):
+#   kubectl apply -f k8s/cluster-issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: doi-thanh-email-cua-ban@example.com
+    privateKeySecretRef:
+      name: letsencrypt-account
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik

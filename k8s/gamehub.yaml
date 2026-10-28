@@ -1,0 +1,86 @@
+# GameHub — CHỈ 1 bản: phòng chơi online nằm trong bộ nhớ tiến trình,
+# chạy 2 bản thì người cùng mã phòng có thể rơi vào 2 pod khác nhau.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gamehub-data
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests: { storage: 10Gi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gamehub
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate          # PVC RWO + phòng trong bộ nhớ → tắt bản cũ rồi mới bật bản mới
+  selector:
+    matchLabels: { app: gamehub }
+  template:
+    metadata:
+      labels: { app: gamehub }
+    spec:
+      terminationGracePeriodSeconds: 15   # server tự lưu kết quả trận khi nhận SIGTERM (tối đa 8s)
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: gamehub
+          image: gamehub
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: 8080 }
+          env:
+            - { name: NODE_ENV, value: production }
+            - { name: PORT, value: "8080" }
+            - { name: GAMEHUB_DATA, value: /app/data }
+            - { name: COOKIE_SECURE, value: "1" }     # chạy sau HTTPS
+            - { name: TRUST_PROXY, value: "1" }       # lấy IP thật từ X-Forwarded-For của Traefik
+            - { name: DB_POOL_MAX, value: "10" }
+            - { name: UPLOADS_PER_HOUR, value: "10" }
+            - { name: CORS_ORIGINS, value: "https://h5.zdn.vn" }   # Zalo Mini App
+            - name: ZALO_APP_SECRET
+              valueFrom: { secretKeyRef: { name: gamehub-secrets, key: ZALO_APP_SECRET, optional: true } }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: gamehub-secrets, key: PGPASSWORD } }
+            - name: DATABASE_URL
+              value: postgres://gamehub:$(PGPASSWORD)@postgres:5432/gamehub
+            - name: APP_SECRET
+              valueFrom: { secretKeyRef: { name: gamehub-secrets, key: APP_SECRET } }
+            - name: ADMIN_USER
+              valueFrom: { secretKeyRef: { name: gamehub-secrets, key: ADMIN_USER } }
+            - name: ADMIN_PASS
+              valueFrom: { secretKeyRef: { name: gamehub-secrets, key: ADMIN_PASS } }
+          startupProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 3
+            failureThreshold: 40      # chờ Postgres + chạy migration tối đa ~2 phút
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests: { cpu: 100m, memory: 192Mi }
+            limits: { memory: 768Mi }
+          volumeMounts:
+            - { name: data, mountPath: /app/data }
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: gamehub-data }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gamehub
+spec:
+  selector: { app: gamehub }
+  ports:
+    - { name: http, port: 80, targetPort: http }

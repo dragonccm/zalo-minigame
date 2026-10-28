@@ -1,0 +1,19 @@
+{
+  "name": "gamehub-zalo-probe",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Bản thử nghiệm kỹ thuật: kiểm tra GameHub chạy được trong Zalo Mini App (API, đăng nhập Zalo, WebSocket, iframe game)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "zmp start",
+    "deploy": "zmp deploy"
+  },
+  "dependencies": {
+    "zmp-sdk": "2.53.3"
+  },
+  "devDependencies": {
+    "vite": "6.3.5"
+  }
+}

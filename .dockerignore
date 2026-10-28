@@ -1,0 +1,13 @@
+node_modules
+data
+shots
+backups
+.env
+.git
+k8s
+tools
+sample-game
+Dockerfile
+.dockerignore
+*.log
+zalo-miniapp

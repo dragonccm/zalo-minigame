@@ -1,0 +1,22 @@
+# Traefik (có sẵn trong k3s) — WebSocket /rt chạy qua đây không cần cấu hình thêm.
+# HTTPS: cài cert-manager + cluster-issuer.yaml, đổi "game.example.com" thành tên miền của bạn.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gamehub
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: [game.example.com]
+      secretName: gamehub-tls
+  rules:
+    - host: game.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: gamehub, port: { name: http } }

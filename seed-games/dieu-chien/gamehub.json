@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "id": "dieu-chien",
+  "name": "Diều Chiến",
+  "version": "2.3.1",
+  "description": "Lái diều bay lượn tự do: ăn vàng, nhặt phép bổ trợ (kiếm, lá chắn, tăng tốc, tàng hình, nam châm, x2 vàng), dùng kiếm hạ đối thủ, gom đủ ngọc skill để mở cổng sang map mới. Chơi online nhiều người (máy chủ tính điểm, thiếu người có bot) hoặc chơi với bot.",
+  "author": "GameHub",
+  "sdk": "1.0",
+  "entry": "index.html",
+  "thumbnail": "thumb.png",
+  "categories": [
+    "io",
+    "arcade",
+    "action"
+  ],
+  "orientation": "both",
+  "controls": [
+    "mouse",
+    "touch",
+    "keyboard"
+  ],
+  "permissions": [
+    "save",
+    "leaderboard",
+    "achievements",
+    "rewards",
+    "multiplayer"
+  ],
+  "scoring": {
+    "label": "Điểm",
+    "order": "desc",
+    "max": 2000000
+  },
+  "rewards": [
+    {
+      "placement": "revive",
+      "name": "+1 mạng",
+      "description": "Hồi sinh và chơi tiếp map đang dở, giữ nguyên điểm",
+      "reward": {
+        "type": "revive",
+        "amount": 1
+      },
+      "cooldownSec": 30,
+      "dailyLimit": 10
+    },
+    {
+      "placement": "coins",
+      "name": "+100 xu",
+      "description": "Dùng để nâng cấp dây và mua mẫu diều",
+      "reward": {
+        "type": "coins",
+        "amount": 100
+      },
+      "cooldownSec": 60,
+      "dailyLimit": 5
+    }
+  ],
+  "achievements": [
+    {
+      "key": "first_kill",
+      "name": "Nhát kiếm đầu tiên",
+      "description": "Dùng kiếm hạ một diều đối thủ",
+      "icon": "sword",
+      "points": 10
+    },
+    {
+      "key": "sword_master",
+      "name": "Kiếm khách",
+      "description": "Hạ 3 diều liên tiếp mà không bị hạ",
+      "icon": "swords",
+      "points": 30
+    },
+    {
+      "key": "ghost",
+      "name": "Bóng ma",
+      "description": "Nhặt phép tàng hình",
+      "icon": "ghost",
+      "points": 10
+    },
+    {
+      "key": "full_power",
+      "name": "Toàn năng",
+      "description": "Có 3 phép bổ trợ cùng lúc",
+      "icon": "sparkles",
+      "points": 25
+    },
+    {
+      "key": "collector",
+      "name": "Túi vàng",
+      "description": "Nhặt 500 vàng trong một lượt chơi",
+      "icon": "coins",
+      "points": 20
+    },
+    {
+      "key": "map_3",
+      "name": "Lữ khách",
+      "description": "Tới map 3",
+      "icon": "map",
+      "points": 20
+    },
+    {
+      "key": "map_5",
+      "name": "Chúa tể bầu trời",
+      "description": "Tới map 5",
+      "icon": "crown",
+      "points": 40
+    },
+    {
+      "key": "upgrade",
+      "name": "Đồ nghề xịn",
+      "description": "Mua một nâng cấp trong cửa hàng",
+      "icon": "wrench",
+      "points": 10
+    },
+    {
+      "key": "new_skin",
+      "name": "Diều mới",
+      "description": "Mua một mẫu diều mới",
+      "icon": "palette",
+      "points": 10
+    }
+  ],
+  "multiplayer": {
+    "mode": "authoritative",
+    "maxPlayers": 16,
+    "minPlayers": 1,
+    "privateRooms": true
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "app": {
+    "title": "GameHub",
+    "headerTitle": "GameHub — kiểm tra",
+    "headerColor": "#1843EF",
+    "textColor": "white",
+    "textAlign": "left",
+    "statusBarColor": "#1843EF",
+    "leftButton": "back"
+  },
+  "debug": false,
+  "listCSS": [],
+  "listSyncJS": [],
+  "listAsyncJS": []
+}

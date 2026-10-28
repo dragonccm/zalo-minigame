@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "id": "cubes-2048",
+  "name": "Cubes 2048 Arena",
+  "version": "1.3.0",
+  "description": "Rắn khối 3D kết hợp 2048: nhặt khối, hợp nhất số, nuốt đối thủ. Chơi online nhiều người trong cùng đấu trường (máy chủ tính điểm) hoặc chơi với bot. Có skin Electric và Trung cổ.",
+  "author": "GameHub",
+  "sdk": "1.0",
+  "entry": "index.html",
+  "thumbnail": "thumb.png",
+  "categories": [
+    "io",
+    "arcade",
+    "casual"
+  ],
+  "orientation": "both",
+  "controls": [
+    "mouse",
+    "keyboard",
+    "touch"
+  ],
+  "permissions": [
+    "save",
+    "leaderboard",
+    "achievements",
+    "rewards",
+    "multiplayer"
+  ],
+  "scoring": {
+    "label": "Điểm",
+    "order": "desc",
+    "max": 10000000
+  },
+  "achievements": [
+    {
+      "key": "merge_64",
+      "name": "Khởi động",
+      "description": "Hợp nhất được khối 64",
+      "icon": "box",
+      "points": 5
+    },
+    {
+      "key": "merge_256",
+      "name": "Lớn dần",
+      "description": "Hợp nhất được khối 256",
+      "icon": "layers",
+      "points": 10
+    },
+    {
+      "key": "merge_1024",
+      "name": "Cận vương",
+      "description": "Hợp nhất được khối 1024",
+      "icon": "gem",
+      "points": 25
+    },
+    {
+      "key": "merge_2048",
+      "name": "Vua 2048",
+      "description": "Hợp nhất được khối 2048",
+      "icon": "crown",
+      "points": 50
+    },
+    {
+      "key": "first_blood",
+      "name": "Máu đầu",
+      "description": "Nuốt rắn đầu tiên của đối thủ",
+      "icon": "swords",
+      "points": 5
+    },
+    {
+      "key": "hunter_5",
+      "name": "Thợ săn",
+      "description": "Nuốt 5 đối thủ trong một lượt chơi",
+      "icon": "crosshair",
+      "points": 20
+    },
+    {
+      "key": "survivor_5m",
+      "name": "Sống sót",
+      "description": "Sống sót 5 phút trong một lượt",
+      "icon": "timer",
+      "points": 15
+    },
+    {
+      "key": "score_1000",
+      "name": "Nghìn điểm",
+      "description": "Đạt 1.000 điểm trong một lượt",
+      "icon": "star",
+      "points": 10
+    },
+    {
+      "key": "score_5000",
+      "name": "Năm nghìn",
+      "description": "Đạt 5.000 điểm trong một lượt",
+      "icon": "sparkles",
+      "points": 30
+    },
+    {
+      "key": "fashionista",
+      "name": "Người sành điệu",
+      "description": "Thử cả 3 skin",
+      "icon": "palette",
+      "points": 10
+    }
+  ],
+  "rewards": [
+    {
+      "placement": "power_boost",
+      "name": "Siêu sức mạnh",
+      "description": "Khiên 10s · nam châm 12s · tăng tốc vô hạn 8s",
+      "reward": {
+        "type": "power_boost",
+        "amount": 10
+      },
+      "cooldownSec": 40,
+      "dailyLimit": 20
+    },
+    {
+      "placement": "start_boost",
+      "name": "Khởi đầu mạnh",
+      "description": "Vào trận với khối 16 và khiên 8 giây",
+      "reward": {
+        "type": "start_cube",
+        "amount": 16
+      },
+      "cooldownSec": 0,
+      "dailyLimit": 10
+    },
+    {
+      "placement": "revive",
+      "name": "Hồi sinh",
+      "description": "Sống lại với khối lớn nhất + khiên 6 giây",
+      "reward": {
+        "type": "revive_shield",
+        "amount": 6
+      },
+      "cooldownSec": 20,
+      "dailyLimit": 10
+    }
+  ],
+  "multiplayer": {
+    "mode": "authoritative",
+    "maxPlayers": 20,
+    "privateRooms": true
+  }
+}

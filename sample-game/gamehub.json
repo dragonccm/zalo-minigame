@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "id": "click-rush",
+  "name": "Click Rush",
+  "version": "1.0.0",
+  "description": "Bấm trúng các mục tiêu xuất hiện ngẫu nhiên trong 30 giây — combo càng cao điểm càng lớn. Game mẫu cho nhà phát triển GameHub.",
+  "author": "GameHub",
+  "sdk": "1.0",
+  "entry": "index.html",
+  "thumbnail": "thumb.png",
+  "categories": [
+    "arcade",
+    "casual"
+  ],
+  "orientation": "landscape",
+  "controls": [
+    "mouse",
+    "touch"
+  ],
+  "permissions": [
+    "leaderboard",
+    "achievements",
+    "save",
+    "rewards"
+  ],
+  "scoring": {
+    "label": "Điểm",
+    "order": "desc",
+    "max": 100000
+  },
+  "achievements": [
+    {
+      "key": "first_run",
+      "name": "Khởi đầu",
+      "description": "Hoàn thành lượt chơi đầu tiên",
+      "icon": "flag",
+      "points": 5
+    },
+    {
+      "key": "ten_hits",
+      "name": "Xạ thủ",
+      "description": "Bấm trúng 10 mục tiêu trong một lượt",
+      "icon": "target",
+      "points": 10
+    },
+    {
+      "key": "score_100",
+      "name": "Trăm điểm",
+      "description": "Đạt 100 điểm trong một lượt",
+      "icon": "medal",
+      "points": 15
+    }
+  ],
+  "rewards": [
+    {
+      "placement": "double_score",
+      "name": "Nhân đôi điểm",
+      "description": "x2 điểm của lượt vừa chơi",
+      "reward": {
+        "type": "score_multiplier",
+        "amount": 2
+      },
+      "cooldownSec": 60,
+      "dailyLimit": 5
+    }
+  ]
+}
