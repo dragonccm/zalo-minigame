@@ -3,7 +3,7 @@ html.halloween {
   --bg: #140b22; --bg2: #1d1230; --card: #1f1533; --card2: #2c1d47; --line: rgba(255, 170, 90, 0.16);
   --accent: #ffa24c; --accent2: #ff7a1a; --hi: #b77dff; --good: #3fcf8e; --bad: #ff6b6b; --warn: #ffb547;
   --text: #f6eeff; --muted: #b9a8d4; --soft: rgba(255, 255, 255, 0.05); --soft2: rgba(255, 255, 255, 0.09);
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35); color-scheme: dark;
+  --shadow: 4px 4px 0 #ff7a1a; color-scheme: dark;
   --hw-orange-soft: rgba(255, 122, 26, 0.16); --hw-orange-text: #ffb36b;
 }
 
@@ -63,7 +63,7 @@ html.halloween .lvl { color: #1a0b00; background: #ffb547; }
 html.halloween .btn { background: var(--card2); }
 html.halloween .btn:hover { background: var(--hw-orange-soft); border-color: rgba(255, 122, 26, 0.5); }
 html.halloween .btn.primary, html.halloween .btn.primary:hover {
-  background: linear-gradient(180deg, #ff9a3c, #e8590c); color: #1f0d00; box-shadow: 0 4px 16px rgba(255, 110, 20, 0.35); }
+  background: linear-gradient(180deg, #ff9a3c, #e8590c); color: #1f0d00; box-shadow: 4px 4px 0 #ff7a1a; }
 html.halloween input[type=text], html.halloween input[type=password], html.halloween input[type=search],
 html.halloween textarea, html.halloween select, html.halloween select option { background: #170f27; }
 html.halloween input:focus, html.halloween textarea:focus, html.halloween select:focus { box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.2); }
@@ -71,9 +71,9 @@ html.halloween pre, html.halloween .logbox { background: #170f27; }
 
 /* ---- trang chủ ---- */
 html.halloween .chip { background: var(--card); }
-html.halloween .chip.on { background: var(--accent2); color: #1f0d00; box-shadow: 0 3px 12px rgba(255, 110, 20, 0.4); }
-html.halloween .gcard:hover { box-shadow: 0 14px 34px rgba(255, 110, 20, 0.22), 0 0 0 1px rgba(255, 122, 26, 0.45); }
-html.halloween .playbtn { background: var(--accent2); color: #1f0d00; box-shadow: 0 8px 24px rgba(255, 110, 20, 0.45); }
+html.halloween .chip.on { background: var(--accent2); color: #1f0d00; box-shadow: 3px 3px 0 #ff7a1a; }
+html.halloween .gcard:hover { box-shadow: 6px 6px 0 #ff7a1a; }
+html.halloween .playbtn { background: var(--accent2); color: #1f0d00; box-shadow: 4px 4px 0 #ff7a1a; }
 html.halloween .tag { background: var(--hw-orange-soft); color: var(--hw-orange-text); }
 html.halloween .thumb { background: linear-gradient(135deg, #2a1645, #6b2fa8 55%, #ff7a1a); }
 
