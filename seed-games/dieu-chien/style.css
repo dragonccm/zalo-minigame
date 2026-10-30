@@ -134,3 +134,9 @@ h3 { margin: 16px 0 8px; font-size: 13px; letter-spacing: 1px; text-transform: u
 .dcall { font-size: 26px; font-weight: 900; color: #fff; text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35); animation: beat 0.35s ease-in-out infinite alternate; }
 .dcall small { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-shadow: none; letter-spacing: 1px; }
 @keyframes beat { to { transform: scale(1.07); } }
+
+/* điện thoại: nút "Tạo phòng riêng" đứng riêng một dòng để khỏi xuống 3 dòng */
+@media (max-width: 420px) {
+  .room #bCreate { flex: 1 1 100%; }
+  .room input { flex: 1; }
+}

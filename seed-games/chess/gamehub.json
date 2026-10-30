@@ -2,7 +2,7 @@
   "schema": 1,
   "id": "chess",
   "name": "Cờ Vua",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Cờ vua đầy đủ luật (nhập thành, bắt tốt qua đường, phong cấp, hòa). Đấu máy 5 cấp độ, đấu online có đồng hồ — máy chủ kiểm tra từng nước đi — hoặc hai người chơi trên cùng thiết bị.",
   "author": "GameHub",
   "sdk": "1.0",

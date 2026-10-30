@@ -127,3 +127,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .pbar { height: 42px; } .clock { font-size: 18px; min-width: 70px; padding: 6px 8px; }
   .mhead img { width: 48px; height: 48px; } .mhead h1 { font-size: 26px; }
 }
+
+/* điện thoại: nút và hàng chọn không được tràn khỏi màn hình */
+@media (max-width: 420px) {
+  .big { min-width: 0; max-width: 100%; flex-wrap: wrap; text-align: center; }
+  .row2 { min-width: 0; }
+  .row2 .lbl { width: auto; flex: none; font-size: 11px; }
+  .row2 .seg { min-width: 0; }
+  .seg.small button { min-width: 0; padding: 6px 2px; font-size: 11px; white-space: nowrap; }
+  .row2 input { min-width: 0; flex: 1; }
+}
+@media (max-width: 420px) { .row2 #mCreate { flex: none; padding: 10px 9px; font-size: 13px; } }
