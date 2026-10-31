@@ -352,3 +352,9 @@ button.round .icon { width: 18px; height: 18px; vertical-align: -3px; }
 .chip .icon { width: 13px; height: 13px; vertical-align: -2px; }
 #boostBtn .icon { width: 26px; height: 26px; vertical-align: -6px; }
 .newbest .icon { width: 13px; height: 13px; vertical-align: -2px; }
+
+/* ---- joystick ảo cảm ứng ---- */
+#joy { position: fixed; z-index: 30; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%;
+  background: rgba(12, 18, 44, 0.30); border: 2px solid rgba(255, 255, 255, 0.55); pointer-events: none; display: none; }
+#joy i { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85); border: 2px solid rgba(12, 18, 44, 0.5); }

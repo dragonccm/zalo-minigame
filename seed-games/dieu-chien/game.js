@@ -111,6 +111,7 @@ let duels = [];
 let run = null, map = null, kites = [], coins = [], orbs = [], items = [], parts = [], texts = [], birds = [], storms = [], winds = [], portal = null;
 let time = 0, paused = false, running = false, me = null, clouds = [], stars = [], skyCache = null;
 const input = { x: 0, y: 0, has: false, boost: false, keys: new Set() };
+const joy = { on: false, ox: 0, oy: 0, dx: 0, dy: 0 };   // joystick ảo cảm ứng: gốc = điểm chạm, kéo để lái
 
 class Kite {
   constructor(o) {
@@ -495,6 +496,7 @@ function update(dt) {
     const turnKey = (input.keys.has('ArrowRight') || input.keys.has('KeyD') ? 1 : 0) - (input.keys.has('ArrowLeft') || input.keys.has('KeyA') ? 1 : 0);
     const upKey = (input.keys.has('ArrowDown') || input.keys.has('KeyS') ? 1 : 0) - (input.keys.has('ArrowUp') || input.keys.has('KeyW') ? 1 : 0);
     if (turnKey || upKey) target = Math.atan2(upKey, turnKey);
+    else if (joy.on && Math.hypot(joy.dx, joy.dy) > 14) target = Math.atan2(joy.dy, joy.dx);
     else if (input.has) { const w = toWorld(input.x, input.y); if (Math.hypot(w.x - me.x, w.y - me.y) > 20) target = Math.atan2(w.y - me.y, w.x - me.x); }
     steer(me, dt, target, input.boost || input.keys.has('Space'));
   } else if (!me.alive && time >= me.respawnAt && run.lives > 0) {
@@ -751,6 +753,16 @@ function render() {
     g.beginPath(); g.moveTo(26, 0); g.lineTo(-14, -18); g.lineTo(-6, 0); g.lineTo(-14, 18); g.closePath(); g.fill(); g.stroke(); g.restore();
   }
   if (running) drawMini();
+  // joystick ảo cảm ứng
+  if (joy.on) {
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const R = 52, mag = Math.hypot(joy.dx, joy.dy), K = Math.min(R - 10, mag), a = Math.atan2(joy.dy, joy.dx);
+    g.beginPath(); g.arc(joy.ox, joy.oy, R, 0, TAU); g.fillStyle = 'rgba(12,18,44,0.30)'; g.fill();
+    g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,0.55)'; g.stroke();
+    g.beginPath(); g.arc(joy.ox + Math.cos(a) * K, joy.oy + Math.sin(a) * K, 23, 0, TAU);
+    g.fillStyle = mag > 14 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.55)'; g.fill();
+    g.lineWidth = 2.5; g.strokeStyle = 'rgba(12,18,44,0.5)'; g.stroke();
+  }
 }
 function drawMini() {
   const w = mini.width, h = mini.height, sx = w / WW, sy = h / WH;
@@ -794,14 +806,24 @@ function frame(now) {
 }
 
 // ---------- điều khiển ----------
-cv.addEventListener('pointermove', e => { input.x = e.clientX; input.y = e.clientY; input.has = true; });
+cv.addEventListener('pointermove', e => {
+  if (e.pointerType === 'touch') {
+    if (joy.on) { joy.dx = e.clientX - joy.ox; joy.dy = e.clientY - joy.oy; }
+    return;                                                  // cảm ứng lái bằng joystick, không dùng điểm tuyệt đối
+  }
+  input.x = e.clientX; input.y = e.clientY; input.has = true;
+});
 cv.addEventListener('pointerdown', e => {
   audio();
   if (me && me.duel && running) { tapDuel(); return; }
+  if (e.pointerType === 'touch') { joy.on = true; joy.ox = e.clientX; joy.oy = e.clientY; joy.dx = joy.dy = 0; return; }
   input.x = e.clientX; input.y = e.clientY; input.has = true;
-  if (e.pointerType === 'mouse') input.boost = true;       // chuột: giữ để tăng tốc; cảm ứng: chạm để lái, nút riêng để tăng tốc
+  if (e.pointerType === 'mouse') input.boost = true;       // chuột: giữ để tăng tốc; cảm ứng: joystick lái, nút riêng để tăng tốc
 });
-const up = e => { if (!e || e.pointerType === 'mouse') input.boost = false; };
+const up = e => {
+  if (!e || e.pointerType === 'mouse') input.boost = false;
+  if (!e || e.pointerType === 'touch') { joy.on = false; joy.dx = joy.dy = 0; }
+};
 cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
 const bb = $('boostBtn');
 bb.addEventListener('pointerdown', e => { e.stopPropagation(); if (me && me.duel) { tapDuel(); return; } input.boost = true; bb.setPointerCapture(e.pointerId); });
@@ -1042,6 +1064,7 @@ function netUpdate(dt) {
   const upKey = (input.keys.has('ArrowDown') || input.keys.has('KeyS') ? 1 : 0) - (input.keys.has('ArrowUp') || input.keys.has('KeyW') ? 1 : 0);
   if (me && me.alive) {
     if (turnKey || upKey) a = Math.atan2(upKey, turnKey);
+    else if (joy.on && Math.hypot(joy.dx, joy.dy) > 14) a = Math.atan2(joy.dy, joy.dx);
     else if (input.has) { const w = toWorld(input.x, input.y); if (Math.hypot(w.x - me.x, w.y - me.y) > 20) a = Math.atan2(w.y - me.y, w.x - me.x); }
     const b = input.boost || input.keys.has('Space') ? 1 : 0;
     if (now - net.sentAt > 0.05 && (net.lastA === null || Math.abs(angDiff(net.lastA, a)) > 0.02 || b !== net.lastB || now - net.sentAt > 0.5)) {

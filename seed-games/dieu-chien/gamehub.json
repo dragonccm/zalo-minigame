@@ -2,7 +2,7 @@
   "schema": 1,
   "id": "dieu-chien",
   "name": "Diều Chiến",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "Lái diều bay lượn tự do: ăn vàng, nhặt phép bổ trợ (kiếm, lá chắn, tăng tốc, tàng hình, nam châm, x2 vàng), dùng kiếm hạ đối thủ, gom đủ ngọc skill để mở cổng sang map mới. Chơi online nhiều người (máy chủ tính điểm, thiếu người có bot) hoặc chơi với bot.",
   "author": "GameHub",
   "sdk": "1.0",

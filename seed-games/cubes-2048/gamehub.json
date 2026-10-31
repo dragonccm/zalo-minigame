@@ -2,7 +2,7 @@
   "schema": 1,
   "id": "cubes-2048",
   "name": "Cubes 2048 Arena",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Rắn khối 3D kết hợp 2048: nhặt khối, hợp nhất số, nuốt đối thủ. Chơi online nhiều người trong cùng đấu trường (máy chủ tính điểm) hoặc chơi với bot. Có skin Electric và Trung cổ.",
   "author": "GameHub",
   "sdk": "1.0",

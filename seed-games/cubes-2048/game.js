@@ -1186,6 +1186,13 @@ function thinkBot(s) {
 
 // ---------- Điều khiển ----------
 const input = { x: 0, y: 0, has: false, touchOrigin: null, mouse: false, key: false, btn: false, tap: false, keys: {} };
+// joystick ảo: vòng tròn hiển thị tại điểm chạm, núm theo ngón (chỉ hình ảnh — logic lái đã có sẵn)
+const joyEl = document.createElement('div'); joyEl.id = 'joy'; joyEl.innerHTML = '<i></i>'; document.body.appendChild(joyEl);
+const joyKnob = joyEl.firstChild;
+const JOY_R = 44;
+function joyShow(ox, oy) { joyEl.style.display = 'block'; joyEl.style.left = ox + 'px'; joyEl.style.top = oy + 'px'; joyKnob.style.transform = 'translate(0,0)'; }
+function joyMove(dx, dy) { const m = Math.hypot(dx, dy), k = m > JOY_R ? JOY_R / m : 1; joyKnob.style.transform = `translate(${dx * k}px,${dy * k}px)`; }
+function joyHide() { joyEl.style.display = 'none'; }
 let lastTap = 0;
 const isInteractive = e => e.target && e.target.closest && e.target.closest('button, input, select, .overlay');
 
@@ -1194,6 +1201,7 @@ window.addEventListener('pointermove', e => {
     if (input.touchOrigin) {
       input.x = e.clientX - input.touchOrigin.x; input.y = e.clientY - input.touchOrigin.y;
       input.has = Math.hypot(input.x, input.y) > 8;
+      joyMove(input.x, input.y);
     }
   } else {
     input.x = e.clientX - window.innerWidth / 2; input.y = e.clientY - window.innerHeight / 2;
@@ -1206,6 +1214,7 @@ window.addEventListener('pointerdown', e => {
   if (e.pointerType === 'touch') {
     input.touchOrigin = { x: e.clientX, y: e.clientY };
     input.x = input.y = 0; input.has = false;
+    joyShow(e.clientX, e.clientY);
     const now = performance.now();
     if (now - lastTap < 320) input.tap = true;
     lastTap = now;
@@ -1214,7 +1223,7 @@ window.addEventListener('pointerdown', e => {
   }
 });
 const release = e => {
-  if (e.pointerType === 'touch') { input.touchOrigin = null; input.tap = false; input.has = false; }
+  if (e.pointerType === 'touch') { input.touchOrigin = null; input.tap = false; input.has = false; joyHide(); }
   else input.mouse = false;
 };
 window.addEventListener('pointerup', release);
