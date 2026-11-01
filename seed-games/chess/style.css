@@ -117,7 +117,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ---------- màn hình dọc / điện thoại ---------- */
 @media (max-aspect-ratio: 1/1), (max-width: 760px) {
   :root { --sz: min(calc(100vw - 16px), calc(100vh - 250px)); }
-  #app { flex-direction: column; justify-content: flex-start; gap: 8px; padding: 8px; }
+  #app { flex-direction: column; justify-content: flex-start; gap: 8px;
+    padding: calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left)); }
   #side { width: var(--sz); height: auto; flex: 1; min-height: 0; }
   #moves { display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; flex: none; padding: 6px; gap: 2px; }
   #moves li { display: flex; gap: 4px; flex: none; background: none !important; }

@@ -1,7 +1,7 @@
 :root { --text: #fff; --muted: #c9d4ee; --accent: #ffcf4a; --good: #49d88a; --bad: #ff6176; --card: rgba(22, 28, 58, 0.9); }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: #1a2350; color: var(--text); font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
-  user-select: none; -webkit-user-select: none; touch-action: none; }
+  user-select: none; -webkit-user-select: none; touch-action: none; overscroll-behavior: none; }
 button { font: inherit; color: inherit; cursor: pointer; }
 .hidden { display: none !important; }
 .muted { color: var(--muted); } .center { text-align: center; } .spacer { flex: 1; } .small { font-size: 12px; }
@@ -9,7 +9,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #cv { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
 
 /* ---------- HUD ---------- */
-#hud { position: fixed; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; pointer-events: none; z-index: 5; }
+#hud { position: fixed; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 8px; padding: calc(10px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 10px calc(12px + env(safe-area-inset-left)); pointer-events: none; z-index: 5; }
 .hbox { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 12px; background: rgba(12, 18, 44, 0.55); backdrop-filter: blur(4px); font-weight: 700; font-size: 14px; }
 .hbox .lv { font-size: 12px; color: var(--muted); } .hbox .lv b { color: #fff; font-size: 15px; }
 .hbox .sc { font-size: 20px; font-weight: 900; color: var(--accent); font-variant-numeric: tabular-nums; min-width: 40px; }
@@ -88,13 +88,13 @@ h3 { margin: 16px 0 8px; font-size: 13px; letter-spacing: 1px; text-transform: u
 .orbs.ready { box-shadow: 0 0 0 2px #c08bff inset; animation: glow 0.8s ease-in-out infinite alternate; }
 @keyframes glow { to { background: rgba(140, 80, 255, 0.55); } }
 .lives { gap: 3px; } .lives .icon { color: var(--bad); width: 18px; height: 18px; } .lives .icon.off { color: rgba(255, 255, 255, 0.25); }
-#powers { position: fixed; left: 12px; top: 64px; z-index: 5; display: grid; gap: 6px; pointer-events: none; }
+#powers { position: fixed; left: calc(12px + env(safe-area-inset-left)); top: calc(64px + env(safe-area-inset-top)); z-index: 5; display: grid; gap: 6px; pointer-events: none; }
 #powers div { display: flex; align-items: center; gap: 7px; padding: 5px 10px 5px 6px; border-radius: 10px; background: rgba(12, 18, 44, 0.55); font-size: 12px; font-weight: 800; min-width: 118px; }
 #powers .pi { width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; }
 #powers .pi .icon { width: 16px; height: 16px; vertical-align: 0; }
 #powers .pt { flex: 1; } #powers .pb { height: 4px; border-radius: 2px; background: currentColor; opacity: 0.8; margin-top: 3px; }
-#mini { position: fixed; right: 12px; bottom: 12px; z-index: 5; width: 180px; height: 120px; border-radius: 12px; background: rgba(12, 18, 44, 0.5); border: 1px solid rgba(255, 255, 255, 0.15); pointer-events: none; }
-#boostBtn { position: fixed; right: 18px; bottom: 148px; z-index: 6; width: 74px; height: 74px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.35);
+#mini { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 5; width: 180px; height: 120px; border-radius: 12px; background: rgba(12, 18, 44, 0.5); border: 1px solid rgba(255, 255, 255, 0.15); pointer-events: none; }
+#boostBtn { position: fixed; right: calc(18px + env(safe-area-inset-right)); bottom: calc(148px + env(safe-area-inset-bottom)); z-index: 6; width: 74px; height: 74px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 207, 74, 0.25); display: grid; place-items: center; touch-action: none; }
 #boostBtn .icon { width: 30px; height: 30px; color: var(--accent); }
 #boostBtn .st { position: absolute; left: 12px; right: 12px; bottom: 9px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.2); overflow: hidden; }
@@ -116,7 +116,7 @@ h3 { margin: 16px 0 8px; font-size: 13px; letter-spacing: 1px; text-transform: u
 #lb li { display: flex; gap: 6px; padding: 2px 4px; border-radius: 6px; } #lb li.me { background: rgba(255, 207, 74, 0.2); color: var(--accent); font-weight: 800; }
 #lb li .n { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; } #lb li .p { font-variant-numeric: tabular-nums; font-weight: 700; }
 #lb li .r { width: 14px; color: var(--muted); }
-@media (max-width: 620px) { #lb { width: 140px; top: auto; bottom: 96px; right: 8px; font-size: 11px; } }
+@media (max-width: 620px) { #lb { width: 140px; top: auto; bottom: calc(96px + env(safe-area-inset-bottom)); right: calc(8px + env(safe-area-inset-right)); font-size: 11px; } }
 
 /* ---------- đấu tay đôi ---------- */
 #duel { position: fixed; left: 50%; top: 70px; transform: translateX(-50%); z-index: 6; width: min(520px, 92vw); padding: 10px 14px 12px; border-radius: 18px;

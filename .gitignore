@@ -5,3 +5,4 @@ node_modules/
 backups/
 k8s/secret.yaml
 .env.dokploy
+.run/

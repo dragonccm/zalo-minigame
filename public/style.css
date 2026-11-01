@@ -18,7 +18,7 @@ pre { background: #eff4ff; border: 1px solid var(--line); border-radius: 12px; p
 pre code { background: none; padding: 0; }
 
 /* ---- header ---- */
-#top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 18px; padding: 10px 22px;
+#top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 18px; padding: calc(10px + env(safe-area-inset-top)) calc(22px + env(safe-area-inset-right)) 10px calc(22px + env(safe-area-inset-left));
   background: rgba(248, 249, 255, 0.88); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
 .logo { font-size: 22px; font-weight: 700; color: var(--text); white-space: nowrap; } .logo:hover { text-decoration: none; }
 .logo b { color: var(--accent2); } .logo-mark { color: var(--accent2); }
@@ -157,14 +157,14 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spa
 .modal-card { margin: auto; background: var(--bg2); border: 1px solid var(--line); border-radius: 20px; padding: 22px; width: min(460px, 100%); box-shadow: 8px 8px 0 #0b1c30; }
 .modal-card.wide { width: min(1100px, 100%); }
 .modal-card h2 { margin-bottom: 14px; }
-#toasts { position: fixed; right: 16px; bottom: 16px; z-index: 60; display: grid; gap: 8px; max-width: min(360px, 90vw); }
+#toasts { position: fixed; right: calc(16px + env(safe-area-inset-right)); bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 60; display: grid; gap: 8px; max-width: min(360px, 90vw); }
 .toast { padding: 11px 16px; border-radius: 14px; background: #fff; border: 1px solid var(--accent2); box-shadow: 4px 4px 0 #0b1c30; animation: tin 0.25s ease-out; font-size: 14px; }
 .toast.good { border-color: var(--good); } .toast.bad { border-color: var(--bad); } .toast .big { font-size: 22px; margin-right: 6px; }
 @keyframes tin { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 900px) {
   .grid2 { grid-template-columns: 1fr; } #nav a { padding: 7px 8px; font-size: 13px; }
-  .subcard { grid-template-columns: 1fr; } #top { flex-wrap: wrap; gap: 10px; padding: 8px 12px; } #searchForm { order: 5; width: 100%; margin: 0; } #searchInput { width: 100%; max-width: none; }
+  .subcard { grid-template-columns: 1fr; } #top { flex-wrap: wrap; gap: 10px; padding: calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 8px calc(12px + env(safe-area-inset-left)); } #searchForm { order: 5; width: 100%; margin: 0; } #searchInput { width: 100%; max-width: none; }
   #view { padding: 14px 12px 40px; }
 }
 
@@ -259,10 +259,10 @@ body.pfs-on { overflow: hidden; }
   table { display: block; overflow-x: auto; white-space: nowrap; }
   .docs h2 { font-size: 21px; } pre { font-size: 12px; padding: 10px; }
   .modal { padding: 10px; } .modal-card { padding: 18px; border-radius: 18px; }
-  #toasts { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+  #toasts { left: 12px; right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); max-width: none; }
   .gamebar .gmeta { display: none; } .gamebar h1 { font-size: 17px; flex: 1; }
   body.gamepage #nav, body.gamepage .banner { display: none; }
-  body.gamepage #top { padding: 6px 12px; } body.gamepage #view { padding: 8px 10px 24px; }
+  body.gamepage #top { padding: calc(6px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 6px calc(12px + env(safe-area-inset-left)); } body.gamepage #view { padding: 8px 10px 24px; }
   .stage { border-radius: 14px; }
   .gameside { gap: 10px; }
 }
