@@ -2,7 +2,7 @@
   --bg: #1e1b24; --panel: #2a2631; --panel2: #34303d; --line: rgba(255, 255, 255, 0.09); --text: #f3efe8; --muted: #a9a2b4;
   --accent: #f2b544; --accent2: #8b6cf6; --good: #4fd18b; --bad: #ff6b7a;
   --light: #f0d9b5; --dark: #b58863; --hl: rgba(255, 221, 87, 0.55); --sel: rgba(139, 108, 246, 0.55); --chk: radial-gradient(circle, #ff3b3b 0%, rgba(255, 59, 59, 0.55) 45%, rgba(255, 59, 59, 0) 72%);
-  --sz: min(calc(100vh - 128px), calc(100vw - 300px), 720px);
+  --sz: min(calc(100vh - 136px), calc(100vw - 300px), 720px);   /* trừ đủ 2 pbar (96) + gap (16) + padding app (24) — trước đây trừ 128 khiến panel dưới bị cắt 8px */
 }
 body.t-green { --light: #eeeed2; --dark: #769656; }
 body.t-slate { --light: #dcd6ea; --dark: #8877b7; }
@@ -17,7 +17,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ---------- bố cục ---------- */
 #app { height: 100%; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 12px; }
 #table { display: flex; flex-direction: column; gap: 8px; width: var(--sz); }
-#side { width: 260px; height: calc(var(--sz) + 104px); display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+#side { width: 260px; height: calc(var(--sz) + 112px); display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
 .pbar { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
 .pav { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--panel2); color: var(--accent); flex: none; }
 .pav .icon { width: 20px; height: 20px; vertical-align: 0; }
@@ -119,18 +119,36 @@ button { font: inherit; color: inherit; cursor: pointer; }
   :root { --sz: min(calc(100vw - 16px), calc(100vh - 250px)); }
   #app { flex-direction: column; justify-content: flex-start; gap: 8px;
     padding: calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left)); }
-  #side { width: var(--sz); height: auto; flex: 1; min-height: 0; }
-  #moves { display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; flex: none; padding: 6px; gap: 2px; }
+  #side { width: var(--sz); height: auto; flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+  .sidehead { padding: 6px 12px; }
+  #moves { display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; flex: none; max-height: 46px; padding: 4px 6px; gap: 2px; }
   #moves li { display: flex; gap: 4px; flex: none; background: none !important; }
-  .sidehead { padding: 8px 12px; }
   .tools { grid-template-columns: repeat(7, 1fr); padding: 6px; gap: 4px; }
   .tools button { padding: 6px 2px; } .tools button span { font-size: 9px; } .tools small { display: none; }
   .pbar { height: 42px; } .clock { font-size: 18px; min-width: 70px; padding: 6px 8px; }
+  .caps { height: 16px; } .caps img { width: 14px; height: 14px; margin-right: -4px; }
   .mhead img { width: 48px; height: 48px; } .mhead h1 { font-size: 26px; }
+}
+
+/* điện thoại ngang: màn thấp — bàn cờ lấy theo chiều cao, nút gộp 1 hàng */
+@media (min-aspect-ratio: 1/1) and (max-height: 520px) {
+  :root { --sz: min(calc(100vh - 132px), calc(100vw - 300px), 640px); }
+  #app { gap: 12px; padding: 8px; }
+  #side { height: calc(var(--sz) + 104px); }
+  .pbar { height: 40px; padding: 0 8px; gap: 8px; }
+  .pav { width: 28px; height: 28px; } .pav .icon { width: 17px; height: 17px; }
+  .pinfo b { font-size: 12px; } .caps { height: 14px; } .caps img { width: 13px; height: 13px; }
+  .clock { font-size: 16px; min-width: 60px; padding: 4px 7px; }
+  #moves { font: 12px/1.45 ui-monospace, Menlo, Consolas, monospace; }
+  #moves li { grid-template-columns: 26px 1fr 1fr; padding: 0 6px; }
+  .tools { grid-template-columns: repeat(7, 1fr); padding: 6px; gap: 4px; }
+  .tools button { padding: 6px 2px; gap: 2px; } .tools button span { font-size: 9px; } .tools small { display: none; }
 }
 
 /* điện thoại: nút và hàng chọn không được tràn khỏi màn hình */
 @media (max-width: 420px) {
+  .tools { grid-template-columns: repeat(4, 1fr); }   /* 7 nút trên 1 hàng hẹp quá nhỏ để bấm */
+  .tools button { padding: 9px 4px; font-size: 10px; }
   .big { min-width: 0; max-width: 100%; flex-wrap: wrap; text-align: center; }
   .row2 { min-width: 0; }
   .row2 .lbl { width: auto; flex: none; font-size: 11px; }
