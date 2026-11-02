@@ -8,7 +8,7 @@ const path = require('node:path');
 const CHROME = process.env.CHROME || '/home/dragonccm/.local/bin/google-chrome';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function launch({ port = 9333, width = 1280, height = 800 } = {}) {
+async function launch({ port = 9333 + Math.floor(Math.random() * 3000), width = 1280, height = 800 } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cdp-'));
   const proc = spawn(CHROME, ['--headless=new', '--no-sandbox', `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`,
     '--disable-site-isolation-trials', '--disable-features=IsolateOrigins,site-per-process',   // giữ iframe cùng tiến trình để đọc context

@@ -275,15 +275,14 @@ button.ghost:hover { background: rgba(255, 255, 255, 0.17); }
   background: #1d1745; color: var(--text); font-size: 14px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 640px), (max-height: 620px) {
   h1 { font-size: 36px; }
   .panel { padding: 20px 16px 18px; }
   .tiles i { width: 32px; height: 32px; font-size: 13px; }
   .howto { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .row input[type=range] { width: 110px; }
-  #scorebox { min-width: 0; padding: 7px 11px; }
-  #hud { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  #scorebox { min-width: 0; padding: 7px 11px; } #hud { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
   #scoreVal { font-size: 24px; }
   .chips { margin: 3px 0; }
   .chip { font-size: 11px; padding: 1px 7px; }
@@ -296,7 +295,9 @@ button.ghost:hover { background: rgba(255, 255, 255, 0.17); }
   #lb li { padding: 2px 6px; gap: 5px; }
   #feed { max-width: 40vw; top: 10px; }
   #feed div { font-size: 11px; padding: 4px 10px; }
-  #mini { width: 90px; height: 90px; bottom: calc(120px + env(safe-area-inset-bottom)); }
+  #mini { width: 70px; height: 70px; bottom: calc(120px + env(safe-area-inset-bottom)); }
+  #lb { opacity: 0.9; } #lb ol li:nth-child(n+4) { display: none; }   /* chỉ hiện top 3 cho thoáng */
+  #feed div:nth-child(n+3) { display: none; }
   #boostWrap { bottom: calc(12px + env(safe-area-inset-bottom)); width: 46vw; opacity: 0.9; }
   #boostWrap .hint { display: none; }
   #adBtn { bottom: calc(44px + env(safe-area-inset-bottom)); font-size: 12px; padding: 7px 12px; }

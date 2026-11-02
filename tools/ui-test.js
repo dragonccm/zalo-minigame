@@ -149,7 +149,7 @@ const ok = (c, name, extra) => { if (c) { pass++; console.log('  ✔', name); } 
     const x1 = await b.eval(`window.__game.player.x`, gctx);
     await b.eval(`window.__game.input.keys.KeyD = false; 1`, gctx);
     ok(Math.abs(x1 - x0) > 3, 'Điều khiển gửi lên máy chủ, rắn di chuyển theo snapshot', { x0, x1 });
-    ok(await waitFor(`/Online|Phòng/.test(document.getElementById('netBadge').textContent)`, 3000, gctx), 'HUD hiện huy hiệu online + ping');
+    ok(await waitFor(`/Online|Phòng/.test(document.getElementById('netBadge').textContent)`, 10000, gctx), 'HUD hiện huy hiệu online + ping');   // headless đói BeginFrame: updateHud (game-time) trôi chậm, badge có thể muộn nhiều giây
     await shot('17-online-play');
     await b.eval(`window.__game.net.room.send('debug_kill', {}); 1`, gctx);
     ok(await waitFor(`/máy chủ đã lưu điểm/.test(document.getElementById('overRank').textContent)`, 8000, gctx), 'Chết → máy chủ tự lưu điểm, màn hình thua báo hạng');

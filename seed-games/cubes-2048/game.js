@@ -1,6 +1,9 @@
 (() => {
 'use strict';
 
+// Khi nhúng trong cổng GameHub: nút âm thanh/toàn màn hình đã có trên thanh portal — ẩn bản trong game cho thoáng HUD (giữ nút cài đặt)
+try { if (window.parent !== window) { document.getElementById('mute').style.display = 'none'; document.getElementById('fs').style.display = 'none'; } } catch (e) {}
+
 /* ============================================================
    Cubes 2048 Arena — rắn khối 3D kết hợp 2048
    ============================================================ */

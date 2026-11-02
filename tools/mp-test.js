@@ -325,8 +325,18 @@ async function completeTask(user, admin, slug, placement) {
   const kpt = await kd1.wait(m => m.t === 'snap' && m.pt);
   ok(kpt && kpt.me[1] >= 4, 'Đủ ngọc → cổng mở (có trong snapshot)', kpt && kpt.pt);
   const kpp = kpt.pt, kmp = kpt.s.find(x => x[0] === kyou.id);
-  kd1.send({ t: 'in', a: Math.atan2(kpp[1] - kmp[2], kpp[0] - kmp[1]), b: 1 });
-  const kround = await kd2.wait(m => m.t === 'round', 6000);
+  // lái lại liên tục về phía cổng (người chơi thật tự chỉnh hướng; 1 góc tĩnh dễ bay vượt qua điểm cổng cũ)
+  const kround = await (async () => {
+    const t0 = Date.now();
+    while (Date.now() - t0 < 12000) {
+      const snap = kd1.last(m => m.t === 'snap' && m.pt && m.s.some(x => x[0] === kyou.id));
+      if (snap) { const k = snap.s.find(x => x[0] === kyou.id); kd1.send({ t: 'in', a: Math.atan2(snap.pt[1] - k[2], snap.pt[0] - k[1]), b: 1 }); }
+      const r = kd1.msgs.find(m => m.t === 'round') || kd2.msgs.find(m => m.t === 'round');
+      if (r) return r;
+      await sleep(300);
+    }
+    return kd2.msgs.find(m => m.t === 'round');
+  })();
   ok(kround && kround.id === kyou.id && kround.next === 2 && kround.bonus === 500, 'Bay vào cổng → thắng vòng, mọi người nhận thông báo', kround);
   const km2a = await kd1.wait(m => m.t === 'map' && m.n === 2, 6000), km2b = await kd2.wait(m => m.t === 'map' && m.n === 2, 6000);
   ok(km2a && km2b && km2a.need === 5 && km2a.hazards.birds, 'Sau 3 giây cả phòng sang map 2 (cần 5 ngọc, có chim)');
