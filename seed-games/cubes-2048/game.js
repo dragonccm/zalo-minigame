@@ -27,6 +27,23 @@ const SPAWN_SHIELD = 3;
 
 // ---------- Tiện ích ----------
 const $ = id => document.getElementById(id);
+// WebGL không khởi động được: hiện hướng dẫn rõ ràng thay vì để game chết im lặng
+function webglFail() {
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:#120d2b;color:#f3efe8;padding:20px;text-align:center;font-family:system-ui,sans-serif';
+  d.innerHTML = '<div style="max-width:420px;line-height:1.6">'
+    + '<div style="font-size:40px">🎮</div>'
+    + '<h2 style="margin:10px 0 6px;font-size:20px">Trình duyệt chưa mở được đồ hoạ 3D (WebGL)</h2>'
+    + '<p style="font-size:14px;color:#a9a2b4;margin:0 0 12px">Cách xử lý:</p>'
+    + '<ol style="font-size:13px;text-align:left;color:#f3efe8;margin:0;padding-left:20px">'
+    + '<li>Bật <b>Tăng tốc phần cứng</b>: Cài đặt Chrome → Hệ thống → “Sử dụng tăng tốc phần cứng”</li>'
+    + '<li>Đóng và mở lại trình duyệt</li>'
+    + '<li>Vẫn lỗi: vào <b>chrome://gpu</b> — nếu WebGL bị “Software only/Disabled” thì máy thiếu driver đồ hoạ</li>'
+    + '</ol>'
+    + '<button id="wgRetry" style="margin-top:16px;padding:10px 22px;border:0;border-radius:12px;background:#f2b544;color:#1e1b24;font-weight:800;cursor:pointer">Thử lại</button></div>';
+  document.body.appendChild(d);
+  d.querySelector('#wgRetry').addEventListener('click', () => location.reload());
+}
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const angDiff = (a, b) => {
@@ -69,7 +86,17 @@ const BOT_NAMES = ['Mèo Béo', 'Rồng Lửa', 'Cún Con', 'Gấu Trúc', 'Sói
 
 // ---------- Three.js ----------
 const canvas = $('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+} catch (e1) {
+  try {   // GPU bị chặn/không khả dụng: thử lại cấu hình mềm (cho phép vẽ bằng phần mềm)
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false });
+  } catch (e2) {
+    webglFail();
+    throw e2;   // dừng nạp 3D nhưng đã hiện hướng dẫn thay vì chết im lặng
+  }
+}
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x120d2b);
@@ -2223,6 +2250,7 @@ function init() {
   $('playBtn').addEventListener('click', () => { if (net) leaveOnline(); startGame(); });
   if (GH.mode === 'hosted') {                   // chơi online chỉ có khi game chạy trên GameHub
     $('playOnline').classList.remove('hidden');
+    setIc($('playOnline'), 'globe', 'CHƠI ONLINE (Vào trận)');
     $('roomRow').classList.remove('hidden');
     $('playBtn').classList.replace('primary', 'ghost');
     setIc($('playBtn'), 'bot', 'Chơi với bot (offline)');
