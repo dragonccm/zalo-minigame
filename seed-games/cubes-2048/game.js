@@ -27,6 +27,23 @@ const SPAWN_SHIELD = 3;
 
 // ---------- Tiện ích ----------
 const $ = id => document.getElementById(id);
+// WebGL không khởi động được: hiện hướng dẫn rõ ràng thay vì để game chết im lặng
+function webglFail() {
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:#120d2b;color:#f3efe8;padding:20px;text-align:center;font-family:system-ui,sans-serif';
+  d.innerHTML = '<div style="max-width:420px;line-height:1.6">'
+    + '<div style="font-size:40px">🎮</div>'
+    + '<h2 style="margin:10px 0 6px;font-size:20px">Trình duyệt chưa mở được đồ hoạ 3D (WebGL)</h2>'
+    + '<p style="font-size:14px;color:#a9a2b4;margin:0 0 12px">Cách xử lý:</p>'
+    + '<ol style="font-size:13px;text-align:left;color:#f3efe8;margin:0;padding-left:20px">'
+    + '<li>Bật <b>Tăng tốc phần cứng</b>: Cài đặt Chrome → Hệ thống → “Sử dụng tăng tốc phần cứng”</li>'
+    + '<li>Đóng và mở lại trình duyệt</li>'
+    + '<li>Vẫn lỗi: vào <b>chrome://gpu</b> — nếu WebGL bị “Software only/Disabled” thì máy thiếu driver đồ hoạ</li>'
+    + '</ol>'
+    + '<button id="wgRetry" style="margin-top:16px;padding:10px 22px;border:0;border-radius:12px;background:#f2b544;color:#1e1b24;font-weight:800;cursor:pointer">Thử lại</button></div>';
+  document.body.appendChild(d);
+  d.querySelector('#wgRetry').addEventListener('click', () => location.reload());
+}
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const angDiff = (a, b) => {
@@ -68,8 +85,7 @@ const BOT_NAMES = ['Mèo Béo', 'Rồng Lửa', 'Cún Con', 'Gấu Trúc', 'Sói
   'Bạch Tuộc', 'Hổ Con', 'Cá Mập', 'Đại Bàng', 'Thỏ Ngọc', 'Khủng Long', 'Kỳ Lân', 'Lão Ngộ'];
 
 // ---------- Three.js ----------
-let canvas = $('c');
-let GL2D = false;   // true = trình duyệt không tạo được WebGL → vẽ bằng canvas 2D
+const canvas = $('c');
 let renderer;
 try {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -77,21 +93,8 @@ try {
   try {   // GPU bị chặn/không khả dụng: thử lại cấu hình mềm (cho phép vẽ bằng phần mềm)
     renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false });
   } catch (e2) {
-    // không có WebGL nào cả: thay canvas bằng bản 2D, mọi logic game vẫn chạy
-    GL2D = true;
-    const old = canvas;
-    canvas = old.cloneNode(false);
-    old.replaceWith(canvas);
-    const note = document.createElement('div');
-    note.style.cssText = 'position:fixed;left:10px;bottom:104px;z-index:5;font:600 11px system-ui,sans-serif;color:#a9a2b4;background:rgba(10,7,32,.7);padding:4px 8px;border-radius:8px;pointer-events:none';
-    note.textContent = 'Chế độ 2D — trình duyệt không hỗ trợ WebGL';
-    document.body.appendChild(note);
-    let pr = Math.min(window.devicePixelRatio || 1, 2);
-    renderer = {
-      setPixelRatio(r) { pr = r; },
-      setSize(w, h) { canvas.width = Math.round(w * pr); canvas.height = Math.round(h * pr); canvas.style.width = w + 'px'; canvas.style.height = h + 'px'; },
-      render() { render2D(); },
-    };
+    webglFail();
+    throw e2;   // dừng nạp 3D nhưng đã hiện hướng dẫn thay vì chết im lặng
   }
 }
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -487,12 +490,8 @@ function updateFloats(dt) {
     f.t += dt;
     if (f.t >= f.max) { f.el.remove(); floats.splice(i, 1); continue; }
     f.y += dt * 2.4;
-    let x, y;
-    if (GL2D) { [x, y] = project2(f.x, f.z); }
-    else {
-      tmpV.set(f.x, f.y, f.z).project(camera);
-      x = (tmpV.x * 0.5 + 0.5) * w; y = (-tmpV.y * 0.5 + 0.5) * h;
-    }
+    tmpV.set(f.x, f.y, f.z).project(camera);
+    const x = (tmpV.x * 0.5 + 0.5) * w, y = (-tmpV.y * 0.5 + 0.5) * h;
     f.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`;
     f.el.style.opacity = String(1 - Math.max(0, (f.t / f.max - 0.55) / 0.45));
   }
@@ -517,77 +516,6 @@ const frees = [];
 const dividers = [];
 const powers = [];
 let time = 0;
-
-// ================= Chế độ 2D (không có WebGL) =================
-const C2D_PAL = ['#63e6be', '#74c0fc', '#fcc419', '#ffa8a8', '#e599f7', '#8ce99a', '#a5d8ff', '#ffc078', '#d0bfff', '#ffe066'];
-const c2dCol = v => C2D_PAL[((Math.log2(v) - 1) % C2D_PAL.length + C2D_PAL.length) % C2D_PAL.length];
-// chiếu đỉnh (top-down) tương đương camera 3D đang nhìn vào focus
-function project2(x, z) {
-  const w = window.innerWidth, h = window.innerHeight;
-  const k = Math.min(w, h) / (focus.d * 1.9);
-  return [w / 2 + (x - focus.x) * k, h * 0.62 + (z - focus.z) * k, k];
-}
-let c2dCtx = null;
-function render2D() {
-  if (!c2dCtx) c2dCtx = canvas.getContext('2d');
-  if (!c2dCtx) return;
-  const g = c2dCtx, w = window.innerWidth, h = window.innerHeight;
-  g.setTransform(canvas.width / w, 0, 0, canvas.height / h, 0, 0);
-  g.fillStyle = '#0a0720'; g.fillRect(0, 0, w, h);
-  const [fx, fy, k] = project2(-HALF, -HALF), FW = HALF * 2 * k;
-  g.fillStyle = '#171238'; g.fillRect(fx, fy, FW, FW);
-  g.strokeStyle = 'rgba(255,255,255,0.05)'; g.lineWidth = 1; g.beginPath();
-  for (let i = 8; i < HALF * 2; i += 8) {
-    g.moveTo(fx + i * k, fy); g.lineTo(fx + i * k, fy + FW);
-    g.moveTo(fx, fy + i * k); g.lineTo(fx + FW, fy + i * k);
-  }
-  g.stroke();
-  g.strokeStyle = '#7c5cff'; g.lineWidth = 4; g.strokeRect(fx, fy, FW, FW);
-  // khối chia đôi
-  g.font = `700 ${Math.max(9, k * 0.7)}px system-ui,sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  for (const d of dividers) {
-    const [x, y] = project2(d.x, d.z);
-    g.fillStyle = '#5c0a0a'; g.fillRect(x - k * 0.55, y - k * 0.55, k * 1.1, k * 1.1);
-    g.fillStyle = '#e03131'; g.fillText('÷2', x, y);
-  }
-  // vật phẩm
-  for (const pw of powers) {
-    const [x, y] = project2(pw.x, pw.z);
-    g.beginPath(); g.arc(x, y, k * 0.75, 0, 7);
-    g.fillStyle = pw.type === 'shield' ? '#74c0fc' : '#ff9f9f'; g.globalAlpha = 0.85; g.fill(); g.globalAlpha = 1;
-  }
-  // khối số rải trên sân
-  for (const c of frees) {
-    const [x, y] = project2(c.x, c.z);
-    const s = k * 1.15;
-    g.fillStyle = c2dCol(c.v);
-    g.beginPath(); g.roundRect(x - s / 2, y - s / 2, s, s, s * 0.18); g.fill();
-    g.fillStyle = '#1e1b24'; g.fillText(fmt(c.v), x, y);
-  }
-  // rắn: vệt + chuỗi khối
-  for (const s of snakes) {
-    if (!s.alive) continue;
-    if (s.trail.length > 1) {
-      g.strokeStyle = s.color; g.globalAlpha = 0.25; g.lineWidth = Math.max(2, k * 0.5); g.lineJoin = 'round';
-      g.beginPath(); g.moveTo(...project2(s.trail[0].x, s.trail[0].z).slice(0, 2));
-      for (let i = 1; i < s.trail.length; i++) { const [x, y] = project2(s.trail[i].x, s.trail[i].z); g.lineTo(x, y); }
-      g.stroke(); g.globalAlpha = 1;
-    }
-    for (let i = s.cubes.length - 1; i >= 0; i--) {
-      const c = s.cubes[i], [x, y] = project2(c.x, c.z), s2 = k * (i === 0 ? 1.6 : 1.15);
-      g.fillStyle = c2dCol(c.value);
-      g.beginPath(); g.roundRect(x - s2 / 2, y - s2 / 2, s2, s2, s2 * 0.18); g.fill();
-      g.lineWidth = s.isPlayer ? 2 : 1;
-      g.strokeStyle = s.isPlayer ? '#ffffff' : 'rgba(0,0,0,0.35)'; g.stroke();
-      if (i === 0) { g.fillStyle = '#1e1b24'; g.fillText(fmt(c.value), x, y); }
-    }
-    if (s.shield > 0) {
-      const [x, y] = project2(s.x, s.z);
-      g.beginPath(); g.arc(x, y, k * 1.9, 0, 7);
-      g.fillStyle = 'rgba(116,192,252,0.3)'; g.fill();
-    }
-  }
-}
 
 // vật liệu "ma": bản sao trong suốt của vật liệu khối (dùng khi nhân vật tàng hình lúc làm nhiệm vụ)
 const ghostMats = new Map();
@@ -1728,16 +1656,12 @@ function updateLabels() {
   const w = window.innerWidth, h = window.innerHeight;
   for (const s of snakes) {
     if (!s.alive || s.ghostHidden) continue;
-    let lx, ly;
-    if (GL2D) { [lx, ly] = project2(s.x, s.z); }
-    else {
-      tmpV.set(s.x, 2.4, s.z).project(camera);
-      lx = (tmpV.x * 0.5 + 0.5) * w; ly = (-tmpV.y * 0.5 + 0.5) * h;
-    }
+    tmpV.set(s.x, 2.4, s.z).project(camera);
     const el = s.label;
-    if (!GL2D && (tmpV.z > 1 || Math.abs(tmpV.x) > 1.1 || Math.abs(tmpV.y) > 1.1)) { el.style.visibility = 'hidden'; continue; }
+    if (tmpV.z > 1 || Math.abs(tmpV.x) > 1.1 || Math.abs(tmpV.y) > 1.1) { el.style.visibility = 'hidden'; continue; }
     el.style.visibility = 'visible';
-    el.style.transform = `translate(${lx.toFixed(1)}px, ${ly.toFixed(1)}px) translate(-50%, -100%)`;
+    const x = (tmpV.x * 0.5 + 0.5) * w, y = (-tmpV.y * 0.5 + 0.5) * h;
+    el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
   }
 }
 
