@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Diều Chiến</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -37,10 +37,10 @@
     <div class="stats"><span><i data-ic="trophy"></i> Kỷ lục <b id="mBest">0</b></span><span><i data-ic="map"></i> Map xa nhất <b id="mMax">1</b></span><span><i data-ic="coins"></i> <b id="mCoins">0</b> xu</span></div>
     <button id="bOnline" class="big primary blue"><i data-ic="globe"></i> Chơi online</button>
     <button id="bPlay" class="big ghost"><i data-ic="bot"></i> Chơi với bot (offline)</button>
-    <div class="row room"><button id="bCreate" class="ghost"><i data-ic="users"></i> Tạo phòng riêng</button><input id="roomCode" maxlength="6" placeholder="MÃ PHÒNG" autocomplete="off"><button id="bJoin" class="ghost">Vào</button></div>
+    <div class="row room"><button id="bCreate" class="ghost"><i data-ic="users"></i> <span class="long-room">Tạo phòng riêng</span><span class="short-room">Tạo phòng</span></button><input id="roomCode" maxlength="6" placeholder="MÃ PHÒNG" autocomplete="off"><button id="bJoin" class="ghost">Vào</button></div>
     <div id="netMsg" class="small netmsg"></div>
-    <div class="row"><button id="bShop" class="ghost"><i data-ic="shopping-cart"></i> Cửa hàng</button><button id="bHow" class="ghost"><i data-ic="circle-help"></i> Cách chơi</button>
-      <button id="bCoins" class="ghost reward"><i data-ic="gift"></i> Nhiệm vụ: +100 xu</button></div>
+    <div class="row row-actions"><button id="bShop" class="ghost"><i data-ic="shopping-cart"></i> <span>Cửa hàng</span></button><button id="bHow" class="ghost"><i data-ic="circle-help"></i> <span>Cách chơi</span></button>
+      <button id="bCoins" class="ghost reward"><i data-ic="gift"></i> <span><em class="lbl-prefix">Nhiệm vụ: </em>+100 xu</span></button></div>
     <div class="row small"><label class="tog"><input type="checkbox" id="optSound" checked> Âm thanh</label></div>
   </div>
 </div>

@@ -157,3 +157,62 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .row2 input { min-width: 0; flex: 1; }
 }
 @media (max-width: 420px) { .row2 #mCreate { flex: none; padding: 10px 9px; font-size: 13px; } }
+
+/* Touch targets and safe-area spacing across phone, tablet, and desktop. */
+html, body { min-height: 100dvh; }
+button { min-height: 40px; touch-action: manipulation; }
+@media (pointer: coarse) { .tools button, .ghost, .seg button { min-height: 46px; } #boardWrap { -webkit-touch-callout: none; } }
+@media (max-width: 760px) { #app { padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); } .overlay { padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); } }
+@media (max-height: 520px) and (orientation: landscape) { .overlay { align-items: flex-start; } .mcard { margin: 8px auto; } }
+
+/* Orientation-first layout: keep the board and controls side by side in landscape,
+   including narrow phones where the generic small-screen rule would stack them. */
+@media (orientation: landscape) and (max-width: 1200px) {
+  :root { --sz: min(calc(100dvh - 78px), calc(100vw - 390px), 720px); }
+  #app { flex-direction: row; justify-content: center; align-items: center; gap: clamp(8px, 2vw, 18px); padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
+  #table { width: var(--sz); flex: none; gap: 6px; }
+  #side { width: clamp(220px, 30vw, 300px); height: min(calc(100dvh - 12px), calc(var(--sz) + 82px)); flex: none; }
+  .pbar { height: 38px; padding: 0 8px; gap: 7px; }
+  .pav { width: 28px; height: 28px; }
+  .clock { min-width: 58px; font-size: 16px; padding: 4px 6px; }
+  .tools { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Portrait: use the full width for the board and keep moves/tools reachable below it. */
+@media (orientation: portrait) and (max-width: 760px) {
+  :root { --sz: min(calc(100vw - 16px), calc(100dvh - 248px), 680px); }
+  #app { overflow-y: auto; height: 100dvh; }
+  #table { flex: none; }
+  #side { flex: none; width: min(var(--sz), 680px); max-height: 190px; }
+  #moves { min-height: 38px; }
+  .tools { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tools button { min-height: 44px; }
+}
+
+@media (orientation: landscape) and (max-height: 390px) {
+  :root { --sz: min(calc(100dvh - 70px), calc(100vw - 250px), 520px); }
+  #side { width: clamp(168px, 28vw, 220px); height: calc(var(--sz) + 84px); }
+  .pbar { height: 34px; }
+  .sidehead { padding: 6px 9px; }
+  .tools { padding: 5px; gap: 3px; }
+  .tools button { padding: 4px 2px; }
+}
+
+/* Small polish: prevent flex children and labels from clipping at compact sizes. */
+#table, #side, .pinfo { min-width: 0; }
+#side { min-height: 0; }
+#statusText { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tools button { min-width: 0; line-height: 1.2; }
+.tools button span { overflow-wrap: anywhere; text-align: center; }
+#moves { overscroll-behavior: contain; }
+@media (orientation: landscape) and (max-width: 1200px) {
+  :root { --sz: min(calc(100dvh - 92px), calc(100vw - 390px), 720px); }
+  #app { gap: clamp(6px, 1.5vw, 16px); }
+  #side { height: min(calc(100dvh - 8px), calc(var(--sz) + 82px)); }
+}
+@media (orientation: portrait) and (max-width: 760px) {
+  #app { overscroll-behavior: contain; }
+  .tools { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tools button { padding: 7px 3px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }

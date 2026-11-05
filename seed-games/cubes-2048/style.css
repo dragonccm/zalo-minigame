@@ -331,14 +331,25 @@ button.ghost:hover { background: rgba(255, 255, 255, 0.17); }
   .howcard .howto { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 640px) {
-  .menugrid { gap: 10px; } .menugrid .panel { padding: 14px 14px; border-radius: 18px; }
-  .menugrid h1 { font-size: 34px; } .menugrid .tiles { margin-bottom: 4px; } .menugrid .tag { margin: 4px 0 10px; font-size: 13px; }
-  .overlay { padding: 10px; }
-}
-@media (max-width: 640px) {
-  .menugrid .howto { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .menugrid .howto div { flex-direction: column; text-align: center; gap: 4px; padding: 8px 6px; }
-  .menugrid .howto p { font-size: 11px; }
+  .overlay { padding: 8px; }
+  .menugrid { gap: 8px; }
+  .menugrid .panel { padding: 10px 12px; border-radius: 14px; }
+  .menugrid h1 { font-size: 24px; margin-bottom: 2px; }
+  .menugrid .tiles { margin-bottom: 2px; }
+  .menugrid .tiles i { width: 24px; height: 24px; font-size: 11px; }
+  .menugrid .tag { margin: 2px 0 6px; font-size: 11px; }
+  .menugrid input { padding: 8px 10px; font-size: 13px; }
+  .menugrid .playcard button.primary { min-height: 38px; padding: 8px 12px; font-size: 14px; }
+  .menugrid .btnrow { gap: 6px; margin: 6px 0; }
+  .menugrid .btnrow .ad, .menugrid .btnrow .ghost { padding: 6px 8px; font-size: 11px; min-height: 32px; }
+  .menugrid .menubest { font-size: 11px; margin-top: 4px; }
+  .menugrid .skin-title { font-size: 11px; margin-bottom: 6px; }
+  .menugrid .skins { gap: 6px; }
+  .menugrid .skins button { width: 36px; height: 36px; font-size: 15px; }
+  .menugrid .howto { grid-template-columns: 1fr 1fr; gap: 4px; }
+  .menugrid .howto div { flex-direction: column; text-align: center; gap: 2px; padding: 6px 4px; }
+  .menugrid .howto p { font-size: 10px; line-height: 1.25; }
+  .menugrid .howto span .icon { width: 18px; height: 18px; }
 }
 
 /* ---------- icon SVG (Lucide) ---------- */
@@ -360,3 +371,11 @@ button.round .icon { width: 18px; height: 18px; vertical-align: -3px; }
   background: rgba(12, 18, 44, 0.30); border: 2px solid rgba(255, 255, 255, 0.55); pointer-events: none; display: none; }
 #joy i { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%;
   background: rgba(255, 255, 255, 0.85); border: 2px solid rgba(12, 18, 44, 0.5); }
+
+/* Responsive play surfaces: account for mobile browser chrome and notches. */
+html, body { min-height: 100dvh; }
+@supports (height: 100dvh) { canvas#c { height: 100dvh; } }
+#hud, #labels { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+@media (pointer: coarse) { #boostBtn { width: 68px; height: 68px; } #gear, #mute, #fsBtn { min-width: 48px; min-height: 48px; } }
+@media (max-width: 760px) { #scorebox { left: max(8px, env(safe-area-inset-left)); top: max(8px, env(safe-area-inset-top)); transform: scale(.88); transform-origin: top left; } #lb { right: max(8px, env(safe-area-inset-right)); top: max(8px, env(safe-area-inset-top)); width: 148px; } #mini { left: max(8px, env(safe-area-inset-left)); bottom: max(8px, env(safe-area-inset-bottom)); width: 100px; height: 100px; } #boostWrap { bottom: max(12px, env(safe-area-inset-bottom)); width: min(260px, 48vw); } #feed { top: max(8px, env(safe-area-inset-top)); max-width: 48vw; } }
+@media (max-height: 430px) and (orientation: landscape) { #scorebox { transform: scale(.72); } #lb { width: 132px; } #mini { width: 78px; height: 78px; } #boostWrap { bottom: 6px; } }
