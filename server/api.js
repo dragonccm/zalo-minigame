@@ -1,4 +1,5 @@
 'use strict';
+const { can, capsOf, ROLES, ROLE_CAPS, CAPS } = require('./permissions');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -58,7 +59,7 @@ function userDto(u) {
   const l = level(u.xp), lo = 20 * (l - 1) ** 2, hi = 20 * l ** 2;
   return {
     id: u.id, username: u.username, displayName: u.display_name, avatar: u.avatar, bio: u.bio,
-    role: u.role, xp: u.xp, level: l, levelProgress: { current: u.xp - lo, needed: hi - lo }, createdAt: ms(u.created_at),
+    role: u.role, capabilities: capsOf(u.role), xp: u.xp, level: l, levelProgress: { current: u.xp - lo, needed: hi - lo }, createdAt: ms(u.created_at),
   };
 }
 const pubUser = u => ({ username: u.username, displayName: u.display_name, avatar: u.avatar });
@@ -95,7 +96,7 @@ function route(method, pattern, handler) {
   routes.push({ method, re, keys, handler });
 }
 const needUser = ctx => { if (!ctx.user) throw new HttpError(401, 'Bạn cần đăng nhập'); return ctx.user; };
-const needAdmin = ctx => { if (needUser(ctx).role !== 'admin') throw new HttpError(403, 'Chỉ dành cho quản trị viên'); return ctx.user; };
+const needCap = (ctx, cap) => { const u = needUser(ctx); if (!can(u, cap)) throw new HttpError(403, 'Bạn không có quyền thực hiện thao tác này'); return u; };
 
 function parseCookies(h) {
   const out = {};
@@ -598,7 +599,7 @@ function verifyTicket(ticket) {
 route('GET', '/api/games/:slug/realtime-ticket', async ctx => {
   const g = await liveGame(ctx.params.slug), mp = g.manifest.multiplayer;
   if (!mp || !g.manifest.permissions.includes('multiplayer')) throw new HttpError(403, 'Game không khai báo multiplayer');
-  rate(`rt:${ctx.user ? ctx.user.id : ctx.ip}`, 60, 600e3);
+  rate(`rt:${ctx.user ? ctx.user.id : ctx.ip}`, 100, 600e3);
   const ticket = signTicket({
     g: g.slug, gid: g.id, u: ctx.user ? ctx.user.id : null, v: viewerOf(ctx.user, ctx.ip),
     n: ctx.user ? ctx.user.display_name : 'Khách', a: ctx.user ? ctx.user.avatar : 'user-round', exp: now() + 60e3,
@@ -716,7 +717,7 @@ function verifyPreview(id, exp, sig) {
 route('GET', '/api/submissions/:id/preview', async ctx => {
   const u = needUser(ctx);
   const s = await one('SELECT * FROM submissions WHERE id = $1', [Number(ctx.params.id) || 0]);
-  if (!s || s.status !== 'pending' || (u.role !== 'admin' && u.id !== s.owner_id)) throw new HttpError(404, 'Không có bản gửi duyệt đang chờ');
+  if (!s || s.status !== 'pending' || (!can(u, 'review_games') && u.id !== s.owner_id)) throw new HttpError(404, 'Không có bản gửi duyệt đang chờ');
   const exp = now() + 3600e3;
   return { url: `/preview/${s.id}~${exp}~${previewSig(s.id, exp)}/${s.manifest.entry}` };
 });
@@ -726,7 +727,7 @@ let realtimeStats = () => ({ rooms: 0, players: 0 });
 const setRealtimeStats = fn => { realtimeStats = fn; };
 
 route('GET', '/api/admin/stats', async ctx => {
-  needAdmin(ctx);
+  needCap(ctx, 'view_dashboard');
   const s = await one(`SELECT
       (SELECT COUNT(*) FROM users) AS users,
       (SELECT COUNT(*) FROM games WHERE status = 'live') AS games,
@@ -740,7 +741,7 @@ route('GET', '/api/admin/stats', async ctx => {
 });
 
 route('GET', '/api/admin/submissions', async ctx => {
-  needAdmin(ctx);
+  needCap(ctx, 'review_games');
   const status = ['pending', 'approved', 'rejected', 'withdrawn'].includes(ctx.query.status) ? ctx.query.status : 'pending';
   return {
     submissions: (await many(`SELECT s.*, u.username AS owner_username, u.display_name AS owner_name FROM submissions s JOIN users u ON u.id = s.owner_id
@@ -756,14 +757,14 @@ function walk(dir, base = dir, out = []) {
   return out;
 }
 route('GET', '/api/admin/submissions/:id/files', async ctx => {
-  needAdmin(ctx);
+  needCap(ctx, 'review_games');
   const dir = path.join(SUBS_DIR, String(Number(ctx.params.id) || 0));
   if (!fs.existsSync(dir)) throw new HttpError(404, 'Gói đã bị xóa');
   return { files: walk(dir).sort((a, b) => a.name.localeCompare(b.name)) };
 });
 
 route('POST', '/api/admin/submissions/:id/review', async ctx => {
-  const admin = needAdmin(ctx), b = await ctx.json();
+  const admin = needCap(ctx, 'review_games'), b = await ctx.json();
   const s = await one('SELECT * FROM submissions WHERE id = $1', [Number(ctx.params.id) || 0]);
   if (!s || s.status !== 'pending') throw new HttpError(404, 'Không có bản gửi duyệt đang chờ');
   const note = String(b.note || '').trim().slice(0, 500);
@@ -809,17 +810,17 @@ route('POST', '/api/admin/submissions/:id/review', async ctx => {
 });
 
 route('GET', '/api/admin/games', async ctx => {
-  needAdmin(ctx);
+  needCap(ctx, 'manage_games');
   return { games: (await many(`${GAME_SQL} ORDER BY g.id DESC`)).map(g => gameDto(g)) };
 });
 route('GET', '/api/admin/games/:slug/versions', async ctx => {
-  needAdmin(ctx);
+  needCap(ctx, 'manage_games');
   const rows = await many(`SELECT v.version, v.published_at, u.username FROM game_versions v JOIN games g ON g.id = v.game_id
                            LEFT JOIN users u ON u.id = v.published_by WHERE g.slug = $1 ORDER BY v.published_at DESC`, [ctx.params.slug]);
   return { versions: rows.map(r => ({ version: r.version, publishedAt: ms(r.published_at), by: r.username })) };
 });
 route('POST', '/api/admin/games/:slug/status', async ctx => {
-  const admin = needAdmin(ctx);
+  const admin = needCap(ctx, 'manage_games');
   const b = await ctx.json();
   if (!['live', 'unpublished'].includes(b.status)) throw bad('status là live | unpublished');
   const r = await q('UPDATE games SET status = $1 WHERE slug = $2', [b.status, ctx.params.slug]);
@@ -829,28 +830,55 @@ route('POST', '/api/admin/games/:slug/status', async ctx => {
 });
 
 route('GET', '/api/admin/users', async ctx => {
-  needAdmin(ctx);
-  return { users: (await many('SELECT * FROM users ORDER BY id DESC LIMIT 200')).map(u => ({ ...userDto(u), banned: u.banned, lastSeenAt: ms(u.last_seen_at) })) };
+  needCap(ctx, 'view_users');
+  const q_ = String(ctx.query.q || '').trim().slice(0, 50), role = ROLES.includes(ctx.query.role) ? ctx.query.role : '';
+  const limit = Math.min(Math.max(Number(ctx.query.limit) || 50, 1), 200), offset = Math.max(Number(ctx.query.offset) || 0, 0);
+  const like = `%${q_.replace(/[%_\\]/g, m => '\\' + m)}%`;
+  const where = `($1 = '' OR u.username ILIKE $2 OR u.display_name ILIKE $2) AND ($3 = '' OR u.role = $3)`;
+  const rows = await many(`SELECT u.*, COUNT(*) OVER() AS total FROM users u WHERE ${where} ORDER BY u.id DESC LIMIT $4 OFFSET $5`, [q_, like, role, limit, offset]);
+  return {
+    total: rows.length ? Number(rows[0].total) : 0,
+    users: rows.map(u => ({ ...userDto(u), banned: u.banned, lastSeenAt: ms(u.last_seen_at) })),
+  };
+});
+route('GET', '/api/admin/roles', async ctx => {
+  needCap(ctx, 'view_users');
+  return { roles: ROLES.map(r => ({ role: r, capabilities: ROLE_CAPS[r] })), capabilities: CAPS };
 });
 route('POST', '/api/admin/users/:id', async ctx => {
-  const admin = needAdmin(ctx), b = await ctx.json();
+  const actor = needUser(ctx), b = await ctx.json();
   const id = Number(ctx.params.id) || 0;
-  if (id === admin.id) throw bad('Không thể tự thay đổi quyền của chính mình');
+  const target = await one('SELECT * FROM users WHERE id = $1', [id]);
+  if (!target) throw new HttpError(404, 'Không tìm thấy người dùng');
+  if (b.role === undefined && b.banned === undefined) throw bad('Không có thay đổi nào');
+  const isAdmin = u => u.role === 'admin';
+  const liveAdmins = async () => (await one("SELECT COUNT(*)::int AS n FROM users WHERE role = 'admin' AND NOT banned")).n;
+
   if (b.role !== undefined) {
-    if (!['user', 'admin'].includes(b.role)) throw bad('role là user | admin');
-    await q('UPDATE users SET role = $1 WHERE id = $2', [b.role, id]);
-    audit(admin.id, 'user.role', id, { role: b.role });
+    if (!can(actor, 'manage_roles')) throw new HttpError(403, 'Chỉ quản trị viên mới đổi được vai trò');
+    if (id === actor.id) throw bad('Không thể tự đổi vai trò của chính mình');
+    if (!ROLES.includes(b.role)) throw bad(`Vai trò phải là ${ROLES.join(' | ')}`);
+    if (isAdmin(target) && b.role !== 'admin' && (await liveAdmins()) <= 1) throw bad('Phải còn ít nhất một quản trị viên đang hoạt động');
+    if (target.role !== b.role) {
+      await q('UPDATE users SET role = $1 WHERE id = $2', [b.role, id]);
+      audit(actor.id, 'user.role', id, { from: target.role, role: b.role });
+    }
   }
   if (b.banned !== undefined) {
+    if (!can(actor, 'ban_users')) throw new HttpError(403, 'Bạn không có quyền khoá tài khoản');
+    if (id === actor.id) throw bad('Không thể khoá chính mình');
+    if (target.role !== 'user' && !isAdmin(actor)) throw new HttpError(403, 'Chỉ quản trị viên mới khoá được moderator hoặc quản trị viên');
+    if (b.banned && isAdmin(target) && (await liveAdmins()) <= 1) throw bad('Không thể khoá quản trị viên cuối cùng');
     await q('UPDATE users SET banned = $1 WHERE id = $2', [!!b.banned, id]);
     if (b.banned) await q('DELETE FROM sessions WHERE user_id = $1', [id]);
-    audit(admin.id, b.banned ? 'user.ban' : 'user.unban', id);
+    audit(actor.id, b.banned ? 'user.ban' : 'user.unban', id);
   }
-  return { ok: true };
+  const u = await one('SELECT * FROM users WHERE id = $1', [id]);
+  return { ok: true, user: { ...userDto(u), banned: u.banned, lastSeenAt: ms(u.last_seen_at) } };
 });
 
 route('GET', '/api/admin/audit', async ctx => {
-  needAdmin(ctx);
+  needCap(ctx, 'view_audit');
   const rows = await many('SELECT a.*, u.username FROM audit_log a LEFT JOIN users u ON u.id = a.actor_id ORDER BY a.id DESC LIMIT 100');
   return { entries: rows.map(r => ({ id: r.id, actor: r.username, action: r.action, target: r.target, data: r.data, at: ms(r.created_at) })) };
 });
@@ -886,43 +914,65 @@ async function taskAdminDto(t) {
 }
 
 route('GET', '/api/admin/tasks', async ctx => {
-  needAdmin(ctx);
+  needCap(ctx, 'manage_tasks');
   const tasks = await many('SELECT * FROM tasks ORDER BY active DESC, priority DESC, id DESC');
   return { tasks: await Promise.all(tasks.map(taskAdminDto)), types: TASK_TYPES, settings: await rewardSettings() };
 });
 route('POST', '/api/admin/tasks', async ctx => {
-  const admin = needAdmin(ctx);
+  const admin = needCap(ctx, 'manage_tasks');
   const v = taskInput(await ctx.json());
   const t = await one(`INSERT INTO tasks (${TASK_COLS.join(', ')}) VALUES (${TASK_COLS.map((_, i) => `$${i + 1}`).join(', ')}) RETURNING *`, v);
   audit(admin.id, 'task.create', t.id, { title: t.title });
   return { task: await taskAdminDto(t) };
 });
 route('PUT', '/api/admin/tasks/:id', async ctx => {
-  const admin = needAdmin(ctx);
+  const admin = needCap(ctx, 'manage_tasks');
   const v = taskInput(await ctx.json());
   const t = await one(`UPDATE tasks SET ${TASK_COLS.map((c, i) => `${c} = $${i + 1}`).join(', ')} WHERE id = $${TASK_COLS.length + 1} RETURNING *`, [...v, Number(ctx.params.id) || 0]);
   if (!t) throw new HttpError(404, 'Không tìm thấy nhiệm vụ');
   audit(admin.id, 'task.update', t.id, { title: t.title, active: t.active });
   return { task: await taskAdminDto(t) };
 });
+route('PATCH', '/api/admin/tasks/:id', async ctx => {
+  const admin = needCap(ctx, 'manage_tasks'), b = await ctx.json();
+  if (typeof b.active !== 'boolean') throw bad('active phải là true | false');
+  const t = await one('UPDATE tasks SET active = $1 WHERE id = $2 RETURNING *', [b.active, Number(ctx.params.id) || 0]);
+  if (!t) throw new HttpError(404, 'Không tìm thấy nhiệm vụ');
+  audit(admin.id, 'task.toggle', t.id, { title: t.title, active: t.active });
+  return { task: await taskAdminDto(t) };
+});
 route('DELETE', '/api/admin/tasks/:id', async ctx => {
-  const admin = needAdmin(ctx);
+  const admin = needCap(ctx, 'manage_tasks');
   const t = await one('DELETE FROM tasks WHERE id = $1 RETURNING id, title', [Number(ctx.params.id) || 0]);
   if (!t) throw new HttpError(404, 'Không tìm thấy nhiệm vụ');
   audit(admin.id, 'task.delete', t.id, { title: t.title });
   return { ok: true };
 });
 route('PUT', '/api/admin/settings/rewards', async ctx => {
-  const admin = needAdmin(ctx);
+  const admin = needCap(ctx, 'manage_settings');
   const b = await ctx.json(), cur = await rewardSettings();
   const cap = b.dailyCapPerViewer === undefined ? cur.dailyCapPerViewer : Number(b.dailyCapPerViewer);
   if (!Number.isInteger(cap) || cap < 1 || cap > 500) throw bad('Giới hạn mỗi người/ngày là số nguyên 1-500');
   const pickB = k => (b[k] === undefined ? cur[k] : !!b[k]);
   const s = { enabled: pickB('enabled'), guestsAllowed: pickB('guestsAllowed'), dailyCapPerViewer: cap, testMode: pickB('testMode') };
-  await q(`INSERT INTO settings (key, value) VALUES ('rewards', $1::jsonb) ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = now()`, [JSON.stringify(s)]);
-  audit(admin.id, 'settings.rewards', 'rewards', s);
+  await saveRewards(admin, s);
   return { settings: s };
 });
+route('GET', '/api/admin/config', async ctx => {
+  needCap(ctx, 'view_dashboard');
+  return { testMode: (await rewardSettings()).testMode };
+});
+route('POST', '/api/admin/config/test-mode', async ctx => {
+  const admin = needCap(ctx, 'manage_settings'), b = await ctx.json();
+  if (typeof b.testMode !== 'boolean') throw bad('testMode phải là true | false');
+  const s = { ...(await rewardSettings()), testMode: b.testMode };
+  await saveRewards(admin, s);
+  return { testMode: s.testMode };
+});
+async function saveRewards(actor, s) {
+  await q(`INSERT INTO settings (key, value) VALUES ('rewards', $1::jsonb) ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = now()`, [JSON.stringify(s)]);
+  audit(actor.id, 'settings.rewards', 'rewards', s);
+}
 
 module.exports = {
   handleApi, currentUser, verifyPreview, verifyTicket, hashPw, HttpError, GAMES_DIR, SUBS_DIR, ROOMS_DIR,
