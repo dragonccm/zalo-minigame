@@ -8,6 +8,8 @@
   },
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "build:web": "npm --prefix web run build",
+    "dev:web": "npm --prefix web run dev",
     "db:up": "docker compose up -d db",
     "db:reset": "node tools/db-reset.js",
     "backup": "node tools/backup.js",

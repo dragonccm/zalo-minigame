@@ -1,0 +1,196 @@
+<h1><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></svg> Chuẩn game GameHub</h1>
+<p class="muted">Tài liệu cho nhà phát triển: cách đóng gói game HTML5 để chạy trên GameHub, lấy dữ liệu người chơi, lưu điểm/thành tựu và được duyệt.</p>
+
+<div class="panel">
+<h3 style="margin-top:0">Quy trình</h3>
+<ol>
+  <li>Làm game HTML5 (Canvas/WebGL/Phaser/Three.js… tùy bạn) — <b>mọi file đều nằm trong gói</b>, không tải CDN.</li>
+  <li>Thêm <code>gamehub.json</code> (khai báo thông tin, thể loại, bảng điểm, thành tựu) và nhúng <code>gamehub-sdk.js</code>.</li>
+  <li>Chạy thử cục bộ: <code>npm run validate -- ./thu-muc-game</code>. Mở <code>index.html</code> trực tiếp cũng được — SDK tự chuyển sang chế độ <i>mock</i>.</li>
+  <li>Nén thành <code>.zip</code> và gửi ở trang <a href="#/upload">Đăng game</a>. Máy chủ kiểm tra tự động.</li>
+  <li>Quản trị viên xem thử và duyệt. Bị từ chối sẽ có ghi chú lý do để bạn sửa và gửi lại. Cập nhật game: tăng <code>version</code> rồi gửi lại.</li>
+</ol>
+</div>
+
+<h2>1. Cấu trúc gói .zip</h2>
+<pre><code>my-game.zip
+├── gamehub.json        ← bắt buộc, ở thư mục gốc
+├── index.html          ← entry (đổi được bằng "entry")
+├── gamehub-sdk.js      ← SDK (tải ở /sdk/gamehub-sdk.js)
+├── thumb.png           ← ảnh đại diện 640×360, ≤ 512KB
+├── game.js, style.css, assets/...</code></pre>
+<p>Nếu bạn nén cả thư mục, hệ thống tự bỏ thư mục gốc. Giới hạn: zip ≤ 30MB, giải nén ≤ 80MB, ≤ 600 file, mỗi file ≤ 25MB. Định dạng cho phép:
+<code>html js css json png jpg gif webp svg ico mp3 ogg wav m4a woff woff2 ttf otf glb gltf bin wasm txt md xml atlas</code>.</p>
+
+<h2>2. gamehub.json</h2>
+<pre><code>{
+  "schema": 1,
+  "id": "click-rush",              // slug duy nhất: a-z, 0-9, "-" (3–40 ký tự)
+  "name": "Click Rush",
+  "version": "1.0.0",              // x.y.z — tăng khi cập nhật
+  "description": "Bấm trúng mục tiêu càng nhiều càng tốt trong 30 giây.",
+  "author": "Tên bạn",
+  "sdk": "1.0",
+  "entry": "index.html",
+  "thumbnail": "thumb.png",
+  "categories": ["arcade", "casual"],
+  "orientation": "landscape",      // landscape | portrait | both
+  "controls": ["mouse", "touch"],
+  "permissions": ["leaderboard", "achievements", "save", "rewards"],
+  "scoring": { "label": "Điểm", "order": "desc", "max": 100000 },
+  "achievements": [
+    { "key": "first_blood", "name": "Khởi đầu", "description": "Ghi điểm lần đầu", "icon": "target", "points": 10 }
+  ],
+  "rewards": [
+    { "placement": "double_score", "name": "Nhân đôi điểm", "description": "x2 điểm lượt vừa chơi",
+      "reward": { "type": "score_multiplier", "amount": 2 }, "cooldownSec": 60, "dailyLimit": 5 }
+  ]
+}</code></pre>
+<table>
+<tr><th>Trường</th><th>Bắt buộc</th><th>Ghi chú</th></tr>
+<tr><td>schema</td><td><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></td><td>Luôn là <code>1</code>.</td></tr>
+<tr><td>id</td><td><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></td><td>Slug (dùng trong URL). Không trùng game khác, không dùng tên dành riêng (admin, api, sdk…).</td></tr>
+<tr><td>name, description, author</td><td><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></td><td>2–40 / 10–500 / 2–40 ký tự.</td></tr>
+<tr><td>version</td><td><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></td><td>Semver. Không được gửi lại đúng phiên bản đã duyệt.</td></tr>
+<tr><td>sdk</td><td><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></td><td>Phiên bản giao thức, hiện là <code>"1.0"</code>.</td></tr>
+<tr><td>categories</td><td><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></td><td>1–3 mục: arcade, io, puzzle, action, strategy, racing, sports, casual, board, adventure, other.</td></tr>
+<tr><td>entry</td><td></td><td>Mặc định <code>index.html</code>.</td></tr>
+<tr><td>thumbnail</td><td></td><td>png/jpg/webp ≤ 512KB. Khuyên dùng.</td></tr>
+<tr><td>orientation, controls</td><td></td><td>Hiển thị cho người chơi; portrait sẽ dùng khung dọc.</td></tr>
+<tr><td>permissions</td><td></td><td><code>leaderboard</code> (gửi điểm), <code>achievements</code> (mở thành tựu), <code>save</code> (lưu dữ liệu), <code>rewards</code> (nhận thưởng qua nhiệm vụ), <code>multiplayer</code> (chơi nhiều người). Gọi API khi chưa khai báo quyền sẽ bị từ chối.</td></tr>
+<tr><td>scoring</td><td></td><td><code>order</code>: <code>desc</code> (cao hơn tốt hơn) hoặc <code>asc</code> (thấp hơn tốt hơn, ví dụ thời gian). <code>max</code> chặn điểm bất thường.</td></tr>
+<tr><td>rewards</td><td></td><td>Tối đa 10 <i>placement</i> (nút nhận thưởng trong game). Mỗi mục: <code>placement</code>, <code>name</code>, <code>reward: {type, amount}</code> (game tự hiểu), <code>cooldownSec</code> (0–3600, mặc định 30), <code>dailyLimit</code> (1–500, mặc định 20). Cần quyền <code>rewards</code>. Xem mục 4.</td></tr>
+<tr><td>multiplayer</td><td></td><td><code>{ mode: "relay", maxPlayers: 2–16, minPlayers, privateRooms }</code>. Cần quyền <code>multiplayer</code>. Xem mục 5.</td></tr>
+<tr><td>achievements</td><td></td><td>Tối đa 50, tổng điểm ≤ 500. <code>key</code>: a-z 0-9 _. Mỗi thành tựu cộng XP cho người chơi. <code>icon</code> là <b>tên icon</b> trong bảng <a href="#icons">Icon có sẵn</a> (không dùng emoji); tên lạ sẽ hiện icon cúp mặc định.</td></tr>
+</table>
+
+<h2>3. GameHub SDK</h2>
+<pre><code>&lt;script src="gamehub-sdk.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const info = await GameHub.init();           // { player, game, settings, preview, mode }
+  // player = { id, username, displayName, avatar, guest }  (guest = true nếu chưa đăng nhập)
+
+  const saved = await GameHub.load();          // dữ liệu đã lưu (hoặc null)
+  /* ... tải xong tài nguyên ... */
+  GameHub.ready();                             // tắt màn hình loading của portal
+
+  GameHub.gameStart();                         // bắt đầu lượt chơi (thống kê)
+  // ... khi thua:
+  const r = await GameHub.gameOver({ score: 1234, meta: { level: 5 } });
+  // r.score = { saved, best, isNewBest, rank }  — saved=false nếu là khách
+
+  GameHub.unlockAchievement('first_blood');    // key khai báo trong gamehub.json
+  GameHub.save({ level: 5, coins: 40 });       // JSON ≤ 64KB / người chơi / game
+  const lb = await GameHub.leaderboard({ period: 'week', limit: 10 });
+
+  GameHub.on('pause',  () =&gt; pauseGame());     // tab bị ẩn
+  GameHub.on('resume', () =&gt; resumeGame());
+  GameHub.on('mute',   e =&gt; setMuted(e.muted)); // nút tắt tiếng của portal
+&lt;/script&gt;</code></pre>
+<table>
+<tr><th>Hàm</th><th>Mô tả</th></tr>
+<tr><td><code>init()</code></td><td>Gọi đầu tiên. Trả về thông tin người chơi.</td></tr>
+<tr><td><code>ready()</code></td><td>Báo đã tải xong.</td></tr>
+<tr><td><code>gameStart()</code> / <code>gameOver({score?, meta?})</code></td><td>Đánh dấu một lượt chơi; <code>gameOver</code> có thể gửi luôn điểm.</td></tr>
+<tr><td><code>submitScore(score, meta?)</code></td><td>Gửi điểm riêng lẻ. Tối đa 1 lần / 2 giây. <code>meta</code> ≤ 2KB.</td></tr>
+<tr><td><code>unlockAchievement(key)</code></td><td>Trả về <code>{ newlyUnlocked }</code>. Gọi lặp lại vô hại.</td></tr>
+<tr><td><code>save(data)</code> / <code>load()</code></td><td>Lưu/đọc tiến trình trên tài khoản. Khách: không lưu.</td></tr>
+<tr><td><code>leaderboard(opts)</code></td><td>Top người chơi theo <code>day | week | all</code>.</td></tr>
+<tr><td><code>requestReward(placement)</code></td><td>Mời người chơi làm nhiệm vụ để nhận thưởng (mục 4). Tên cũ: <code>showRewardedAd</code>.</td></tr>
+<tr><td><code>rewardStatus(placement)</code></td><td>Kiểm tra trước có nhận được không (để ẩn/hiện nút), không mở giao diện.</td></tr>
+<tr><td><code>on(event, fn)</code></td><td><code>pause</code>, <code>resume</code>, <code>mute</code>, <code>task</code> (<code>{open, placement}</code> — người chơi đang làm / đã xong nhiệm vụ nhận thưởng).</td></tr>
+</table>
+<p>Mọi hàm trả về Promise. Khi mở game độc lập (không trong GameHub) SDK chạy chế độ <b>mock</b>: dữ liệu lưu trong <code>localStorage</code>, log ra console, <code>GameHub.player.mock === true</code>.</p>
+
+<h3>Giao thức (nếu muốn tự viết SDK)</h3>
+<p>Game nói chuyện với portal bằng <code>window.parent.postMessage</code>. Game → portal: <code>{gh:1, id, type, payload}</code> với <code>type</code> ∈ <code>init, ready, gameStart, gameOver, submitScore, unlockAchievement, save, load, leaderboard, event</code>. Portal trả lời <code>{gh:1, replyTo:id, ok, data | error}</code> và gửi sự kiện <code>{gh:1, event:'pause'|'resume'|'mute'|'task', data}</code>. Chỉ tin tin nhắn có <code>event.source === window.parent</code>.</p>
+
+<h2>4. Nhiệm vụ nhận thưởng (thay cho quảng cáo thưởng)</h2>
+<p>Thay vì xem quảng cáo, người chơi <b>làm một nhiệm vụ</b> do quản trị viên GameHub tạo — ví dụ xem live TikTok 30 giây, đọc một bài viết Facebook, xem video YouTube — rồi game trao thưởng.
+Game <b>không</b> cần biết nhiệm vụ là gì; game chỉ khai báo phần thưởng và gọi SDK.</p>
+<pre><code>// gamehub.json: "permissions": [..., "rewards"], "rewards": [ { "placement": "revive", "name": "Hồi sinh",
+//   "reward": { "type": "revive", "amount": 1 }, "cooldownSec": 30, "dailyLimit": 10 } ]
+
+// Có thể đọc cấu hình đã khai báo:
+GameHub.rewards.revive   // { placement, name, reward: {type, amount}, cooldownSec, dailyLimit }
+
+reviveButton.onclick = async () =&gt; {
+  const r = await GameHub.requestReward('revive');   // portal tạm dừng game và hiện danh sách nhiệm vụ
+  if (r.rewarded) revivePlayer(r.reward.amount);       // game tự trao thưởng
+  else if (r.reason === 'cooldown') showToast(`Thử lại sau ${r.retryAfterSec} giây`);
+};</code></pre>
+<table>
+<tr><th>Kết quả</th><th>Ý nghĩa</th></tr>
+<tr><td><code>{ rewarded: true, reward, placement, token, task }</code></td><td>Người chơi đã làm xong. <code>token</code> là chữ ký của GameHub (dành cho game có server riêng muốn đối chiếu).</td></tr>
+<tr><td><code>reason: 'closed'</code></td><td>Người chơi đóng bảng nhiệm vụ.</td></tr>
+<tr><td><code>reason: 'cooldown'</code></td><td>Chưa hết <code>cooldownSec</code> kể từ lần nhận trước — kèm <code>retryAfterSec</code>.</td></tr>
+<tr><td><code>reason: 'limit'</code></td><td>Hết lượt hôm nay (theo <code>dailyLimit</code> của game hoặc giới hạn chung của hệ thống).</td></tr>
+<tr><td><code>reason: 'no_tasks' | 'disabled' | 'login'</code></td><td>Chưa có nhiệm vụ nào / quản trị viên tắt tính năng / cần đăng nhập.</td></tr>
+</table>
+<p>Luồng ở phía người chơi: chọn nhiệm vụ → bấm <b>Mở</b> (link mở ở tab mới) → ở lại đủ thời gian (và nhập <b>mã xác nhận</b> nếu nhiệm vụ yêu cầu) → bấm <b>Nhận thưởng</b>. Máy chủ GameHub kiểm tra thời gian, mã, cooldown và giới hạn; game bị tạm dừng (sự kiện <code>pause</code>) và tắt tiếng trong lúc đó.</p>
+<p><b>Bảo vệ nhân vật khi làm nhiệm vụ:</b> portal gửi <code>task</code> với <code>{open:true}</code> khi mở khung nhiệm vụ và <code>{open:false}</code> khi đóng. Game nên cho nhân vật <b>tàng hình / bất tử</b> trong khoảng này (nhất là game online, vì đấu trường không dừng lại) và cho vài giây bảo vệ khi hiện lại. Với phòng multiplayer, máy chủ GameHub biết người chơi có đang làm nhiệm vụ thật hay không (<code>services.taskActive</code>) nên client không tự bật tàng hình để gian lận được. Khi chạy độc lập (mock), <code>requestReward</code> luôn trả <code>rewarded: true</code> để bạn thử nhanh.</p>
+
+<h2>5. Chơi nhiều người (multiplayer)</h2>
+<p>GameHub có máy chủ realtime (WebSocket). Game khai báo trong <code>gamehub.json</code> rồi dùng <code>GameHub.multiplayer.join()</code> — SDK tự xin "vé" qua portal và kết nối, bạn không cần viết server.</p>
+<pre><code>// gamehub.json
+"permissions": [..., "multiplayer"],
+"multiplayer": { "mode": "relay", "maxPlayers": 4, "minPlayers": 2, "privateRooms": true }</code></pre>
+<table>
+<tr><th>Chế độ</th><th>Ai dùng được</th><th>Cách hoạt động</th></tr>
+<tr><td><code>relay</code></td><td>Mọi game đăng lên (tối đa 16 người/phòng)</td><td>Máy chủ chuyển tin giữa người chơi, giữ <b>trạng thái phòng</b> dạng key/value và chọn <b>host</b> (người vào đầu tiên; host rời thì chuyển cho người kế). Logic game chạy ở client — thường host quyết định kết quả.</td></tr>
+<tr><td><code>authoritative</code></td><td>Chỉ game hệ thống (tối đa 50)</td><td>Máy chủ chạy logic game (va chạm, điểm, bot) và <b>tự ghi điểm</b> — không gian lận được. Ví dụ: Cubes 2048. Game đăng lên không thể chạy mã trên máy chủ.</td></tr>
+</table>
+<pre><code>const room = await GameHub.multiplayer.join();               // ghép phòng công khai
+// await GameHub.multiplayer.join({ create: true })          // tạo phòng riêng -> room.code (6 ký tự) gửi cho bạn bè
+// await GameHub.multiplayer.join({ code: 'K7QX2M' })        // vào phòng riêng bằng mã
+
+room.me        // { id, name, avatar, guest }
+room.players   // { [id]: {id, name, avatar, guest} }
+room.host      // id của host; room.state: trạng thái chung
+
+room.on('join',  p =&gt; addPlayer(p));
+room.on('leave', p =&gt; removePlayer(p.id));
+room.on('host',  id =&gt; iAmHost = id === room.me.id);
+room.on('move',  (data, fromId) =&gt; moveRemote(fromId, data));   // tin nhắn tự đặt tên
+room.on('state', (key, value) =&gt; render());
+room.on('close', () =&gt; showDisconnected());
+
+room.send('move', { x: 10, y: 4 });          // gửi cho mọi người khác
+room.sendTo(playerId, 'hint', { ... });      // gửi riêng
+room.setState('turn', room.me.id);           // ai cũng nhận sự kiện 'state'
+const ms = await room.ping();                // độ trễ
+room.leave();</code></pre>
+<p>Giới hạn: mỗi tin ≤ 16KB, khoảng 40 tin/giây/người (gửi vị trí khoảng 10–20 lần/giây là đủ), trạng thái phòng ≤ 64 khóa / 16KB. Phòng trống tự đóng sau 30 giây.
+Khi chạy độc lập (mock) hoặc ở chế độ xem thử, <code>join()</code> báo lỗi <code>code: 'offline'</code> — hãy có chế độ chơi đơn dự phòng. Lịch sử trận được lưu vào hồ sơ người chơi.</p>
+
+<h2>6. Môi trường chạy & ràng buộc kỹ thuật</h2>
+<ul>
+  <li>Game chạy trong <b>iframe sandbox</b> (<code>allow-scripts allow-pointer-lock</code>, không có <code>allow-same-origin</code>): <b>không</b> truy cập được cookie, <code>localStorage</code>, <code>IndexedDB</code> hoặc DOM của portal. Dùng <code>GameHub.save()</code> để lưu dữ liệu.</li>
+  <li><b>CSP nghiêm ngặt</b>: chỉ nạp tài nguyên từ chính gói game (và <code>data:</code>/<code>blob:</code>); mọi <code>fetch</code>/WebSocket/CDN/font ngoài đều bị chặn (trừ kết nối multiplayer tới chính máy chủ GameHub qua SDK). Hãy đóng gói thư viện (Three.js, Phaser…) vào zip.</li>
+  <li>Không có popup, form submit, hoặc điều hướng trang cha. Fullscreen do portal điều khiển.</li>
+  <li>Game nên co giãn theo kích thước khung (<code>window.innerWidth/innerHeight</code>) và hỗ trợ tạm dừng khi nhận <code>pause</code>.</li>
+  <li>Điểm gửi từ phía client nên được xem là <i>không tuyệt đối đáng tin</i>; hãy khai báo <code>scoring.max</code> hợp lý. Hệ thống giới hạn tần suất gửi điểm.</li>
+</ul>
+
+<h2>7. Tiêu chí duyệt</h2>
+<ul>
+  <li>Đạt kiểm tra tự động (manifest hợp lệ, file được phép, entry tồn tại, không tải tài nguyên ngoài).</li>
+  <li>Game chạy được, không treo/lỗi trong vài phút đầu; có hướng dẫn chơi rõ ràng.</li>
+  <li>Phần thưởng nhiệm vụ hợp lý, không bắt người chơi làm nhiệm vụ mới chơi được phần chính của game.</li>
+  <li>Có gọi <code>ready()</code>; nếu có bảng điểm thì gửi điểm bằng SDK; thành tựu khai báo đều có thể đạt được.</li>
+  <li>Nội dung phù hợp mọi lứa tuổi: không bạo lực thái quá, không nội dung người lớn, không vi phạm bản quyền, không quảng cáo/ theo dõi người chơi.</li>
+  <li>Không cố thoát sandbox, đào tiền ảo, thu thập dữ liệu hoặc gọi ra ngoài.</li>
+</ul>
+
+<h2>8. Công cụ</h2>
+<pre><code># kiểm tra thư mục hoặc zip trước khi gửi
+npm run validate -- ./my-game
+npm run validate -- ./my-game.zip
+
+# đóng gói
+cd my-game &amp;&amp; zip -r ../my-game.zip . -x ".*"</code></pre>
+<p>Mẫu để bắt đầu: thư mục <code>sample-game/</code> trong mã nguồn GameHub (game "Click Rush" đầy đủ SDK, bảng điểm và thành tựu).</p>
+
+<h2 id="icons">Icon có sẵn</h2>
+<p>GameHub dùng bộ icon <a href="https://lucide.dev" target="_blank" rel="noopener noreferrer">Lucide</a> (giấy phép ISC). Dùng các tên dưới đây cho <code>icon</code> của thành tựu. Trong game của bạn, có thể chép file <code>icons.js</code> (sinh bằng <code>node tools/build-icons.js</code>) vào gói và gọi <code>ic('trophy')</code> để lấy SVG, hoặc <code>ic.draw(ctx, 'shield', x, y, cỡ, màu)</code> để vẽ lên canvas.</p>
+<div class="iconlist" id="iconList"></div>
