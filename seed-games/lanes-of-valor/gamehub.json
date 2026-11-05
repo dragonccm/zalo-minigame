@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "id": "lanes-of-valor",
+  "name": "Thủ Tuyến Quái Vật",
+  "version": "1.0.11",
+  "description": "Đổi làn né quái, tự động chiến đấu và dựng phòng tuyến. Sống sót qua từng đợt để nâng cấp anh hùng, tường và bẫy.",
+  "author": "GameHub",
+  "sdk": "1.0",
+  "entry": "index.html",
+  "thumbnail": "thumb.png",
+  "categories": ["action", "strategy"],
+  "orientation": "both",
+  "controls": ["keyboard", "touch", "mouse"],
+  "permissions": ["save", "leaderboard", "achievements"],
+  "scoring": { "label": "Điểm", "order": "desc", "max": 1000000 },
+  "achievements": [
+    { "key": "wave_five", "name": "Giữ vững tuyến", "description": "Vượt qua đợt quái thứ 5", "icon": "shield", "points": 15 },
+    { "key": "boss_slayer", "name": "Hạ trùm", "description": "Đánh bại một quái trùm", "icon": "swords", "points": 20 },
+    { "key": "perfect_wave", "name": "Không thủng tuyến", "description": "Hoàn thành một đợt mà căn cứ không mất máu", "icon": "heart", "points": 15 }
+  ]
+}

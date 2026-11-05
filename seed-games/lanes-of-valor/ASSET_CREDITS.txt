@@ -1,0 +1,4 @@
+Art assets: hand-assembled character prefabs and their idle/move/attack animation clips, plus the painted background, from "100 Fantasy Characters Mega Pack" by Blackthornprod.
+Source: https://assetstore.unity.com/packages/2d/characters/100-fantasy-characters-mega-pack-222143
+In-game sprite strips are derived from the source prefabs and animation clips. Use is subject to the Unity Asset Store EULA and the user's applicable Asset Store license. Do not redistribute the original pack or atlas separately.
+See ASSET_PIPELINE.md for the prefab and clip mapping.

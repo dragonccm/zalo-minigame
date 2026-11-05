@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "id": "caro",
+  "name": "Cờ Caro",
+  "version": "1.1.4",
+  "description": "Caro 15×15: đấu máy, hai người cùng máy hoặc đấu online 1-1 với đồng hồ và phòng riêng.",
+  "author": "GameHub",
+  "sdk": "1.0",
+  "entry": "index.html",
+  "thumbnail": "thumb.png",
+  "categories": ["board", "strategy"],
+  "orientation": "both",
+  "controls": ["mouse", "touch"],
+  "permissions": ["save", "leaderboard", "achievements", "multiplayer"],
+  "scoring": { "label": "Điểm Caro", "order": "desc", "max": 5000 },
+  "multiplayer": { "mode": "authoritative", "maxPlayers": 2, "minPlayers": 2, "privateRooms": true },
+  "achievements": [
+    { "key": "first_win", "name": "Năm quân đầu tiên", "description": "Thắng một ván Caro", "icon": "trophy", "points": 10 },
+    { "key": "online_win", "name": "Cao thủ Caro", "description": "Thắng một ván online", "icon": "medal", "points": 20 }
+  ]
+}

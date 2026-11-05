@@ -34,6 +34,7 @@ Không muốn dùng Docker? Bỏ trống `DATABASE_URL` → dùng **PGlite** (Po
 | **Cubes 2048 Arena** | .io 3D | online nhiều người (máy chủ chạy logic), bot, skin, nhiệm vụ thưởng |
 | **Cờ Vua** | cờ bàn | đủ luật (perft chuẩn), AI 5 cấp trong Web Worker, **online 1-1** có đồng hồ (máy chủ kiểm tra nước đi — `server/rooms/chess.js` dùng chung `chess-rules.js`), hai người một máy, gợi ý qua nhiệm vụ |
 | **Diều Chiến** | arcade | chọi diều: kéo/nhả dây, chéo dây để cứa đứt dây đối thủ, bot AI, màn chơi tăng dần, đồ nhặt, đàn chim, cửa hàng nâng cấp & mẫu diều |
+| **Thủ Tuyến Quái Vật** | hành động / chiến thuật | đổi làn né quái và tự động bắn; dựng tường, bẫy, nâng cấp anh hùng; độ khó tăng theo đợt |
 
 - **Tài khoản & hồ sơ**: đăng ký/đăng nhập (scrypt bất đồng bộ, phiên cookie HttpOnly), avatar, giới thiệu, cấp độ/XP, đổi mật khẩu; hồ sơ công khai có điểm cao nhất, thành tựu, game hay chơi, **lịch sử trận online**.
 - **Portal**: trang chủ lọc thể loại/tìm kiếm, trang chơi (iframe sandbox, toàn màn hình), bảng xếp hạng ngày/tuần/tất cả, thành tựu.

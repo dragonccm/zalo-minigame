@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#11151b">
+<title>Thủ Tuyến Quái Vật</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="shell">
+  <header class="topbar">
+    <div class="brand"><span class="brand-icon">✦</span><div><strong>THỦ TUYẾN</strong><small>ĐỒN TRẠI CUỐI CÙNG</small></div></div>
+    <div class="top-stats"><span class="stat"><i>◈</i><b id="gold">0</b><small>VÀNG</small></span><span class="stat"><i>⚔</i><b id="wave">0</b><small>ĐỢT</small></span><span class="stat health"><i>♥</i><b id="baseHp">100</b><small>CĂN CỨ</small></span></div>
+    <button id="pauseBtn" class="icon-btn" aria-label="Tạm dừng">Ⅱ</button>
+  </header>
+  <section id="arena" aria-label="Chiến trường 3 làn">
+    <canvas id="game"></canvas>
+    <div class="arena-vignette"></div>
+    <div class="lane-labels"><span>01 · RỪNG</span><span>02 · ĐƯỜNG CỔ</span><span>03 · ĐỒI ĐÁ</span></div>
+    <div id="toast" class="toast"></div>
+    <div class="touch-controls" aria-label="Điều khiển đổi làn">
+      <button id="upBtn" aria-label="Lên một làn">▲</button>
+      <button id="downBtn" aria-label="Xuống một làn">▼</button>
+    </div>
+    <div class="arena-hint" id="hint">W / S hoặc ↑ / ↓ để đổi làn</div>
+  </section>
+  <footer class="bottom-bar"><div class="objective"><span class="pulse"></span><span id="objective">Chuẩn bị giữ tuyến</span></div><div class="weapon"><span>VŨ KHÍ</span><b id="weapon">Pháp trượng</b><span class="level" id="weaponLv">CẤP 1</span></div><button id="buildBtn" class="build-btn"><span>＋</span> XÂY PHÒNG TUYẾN</button></footer>
+</main>
+<div id="overlay" class="overlay">
+  <section id="startCard" class="card start-card">
+    <div class="eyebrow">CHIẾN DỊCH ĐƠN · 3 LÀN PHÒNG THỦ</div>
+    <h1>THỦ TUYẾN<br><em>QUÁI VẬT</em></h1>
+    <p>Chuyển làn để né đòn và đưa anh hùng vào tầm bắn. Quái sẽ tràn qua nhiều cửa rừng. Dùng vàng dựng chướng ngại, bẫy và nâng cấp để giữ căn cứ.</p>
+    <div class="feature-row"><span>✦ TỰ ĐỘNG TẤN CÔNG</span><span>▰ XÂY TƯỜNG & BẪY</span><span>↗ ĐỢT QUÁI TĂNG TIẾN</span></div>
+    <button id="playBtn" class="primary-btn" disabled>ĐANG TẢI NHÂN VẬT… <span>⌛</span></button>
+    <div class="controls-note">BÀN PHÍM: W/S hoặc ↑/↓ <i>·</i> ĐIỆN THOẠI: NÚT LÊN/XUỐNG</div>
+  </section>
+  <section id="shopCard" class="card shop-card hidden">
+    <div class="shop-head"><div><div class="eyebrow" id="shopContext">KHOẢNG NGHỈ SAU ĐỢT <span id="shopWave">1</span></div><h2>Gia cố phòng tuyến</h2></div><div class="shop-gold">◈ <b id="shopGold">0</b></div></div>
+    <p class="shop-desc">Chọn làn để đặt công trình hoặc nâng cấp anh hùng.</p>
+    <div class="lane-picker" aria-label="Chọn làn đặt công trình"><button type="button" data-shop-lane="0">LÀN 1 <small id="laneStatus0">Trống</small></button><button type="button" data-shop-lane="1">LÀN 2 <small id="laneStatus1">Trống</small></button><button type="button" data-shop-lane="2">LÀN 3 <small id="laneStatus2">Trống</small></button></div>
+    <div class="shop-grid">
+      <button class="buy-card" data-buy="wall"><span class="item-icon wall-icon">▰</span><b>Tường gỗ</b><small>Chặn quái một nhịp tấn công</small><strong>◈ 35</strong></button>
+      <button class="buy-card" data-buy="trap"><span class="item-icon trap-icon">⌁</span><b>Bẫy gai</b><small>Gây sát thương lớn khi quái dẫm phải</small><strong>◈ 45</strong></button>
+      <button class="buy-card" data-buy="damage"><span class="item-icon dmg-icon">✦</span><b>Cường hóa trượng</b><small>Tăng sức mạnh cho mỗi đòn phép</small><strong>◈ <span id="damageCost">60</span></strong></button>
+      <button class="buy-card" data-buy="speed"><span class="item-icon speed-icon">➤</span><b>Tăng tốc bắn</b><small>Rút ngắn thời gian giữa hai phát</small><strong>◈ <span id="speedCost">70</span></strong></button>
+      <button class="buy-card" data-buy="heal"><span class="item-icon heal-icon">♥</span><b>Sửa căn cứ</b><small>Hồi lại 25 máu căn cứ</small><strong>◈ 40</strong></button>
+      <button class="buy-card continue" data-buy="continue"><span class="item-icon">→</span><b id="continueLabel">Đợt tiếp theo</b><small id="continueHint">Sẵn sàng đón đợt tiếp theo</small><strong>VÀO TRẬN</strong></button>
+    </div>
+    <div class="shop-footer"><span id="shopTip">Chọn làn cần phòng thủ trước khi mua.</span><button id="continueBtn" class="primary-btn">ĐỢT TIẾP THEO <span>→</span></button></div>
+  </section>
+  <section id="pauseCard" class="card compact-card hidden"><div class="eyebrow">TẠM NGHỈ</div><h2>Dừng một chút</h2><p>Đội phòng thủ đang chờ lệnh.</p><button id="resumeBtn" class="primary-btn">TIẾP TỤC <span>→</span></button><button id="quitBtn" class="text-btn">VỀ MÀN HÌNH ĐẦU</button></section>
+  <section id="overCard" class="card compact-card hidden"><div class="eyebrow">CĂN CỨ THẤT THỦ</div><h2>Phòng tuyến đã vỡ</h2><p id="runSummary">Bạn đã giữ được 0 đợt.</p><div class="run-score"><span>ĐIỂM TRẬN</span><b id="runScore">0</b></div><button id="againBtn" class="primary-btn">THỬ LẠI <span>→</span></button><button id="homeBtn" class="text-btn">VỀ MÀN HÌNH ĐẦU</button></section>
+</div>
+<script src="gamehub-sdk.js"></script><script src="game.js"></script>
+</body></html>

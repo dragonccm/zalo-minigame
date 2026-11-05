@@ -38,7 +38,7 @@ async function pickRoom(c, msg) {
   if (msg.code) {
     const r = mine.find(x => x.code === String(msg.code).toUpperCase().trim());
     if (!r) throw new Error('Không tìm thấy phòng với mã này');
-    if (r.full) throw new Error('Phòng đã đầy');
+    if (r.full || r.acceptsNewPlayers?.() === false) throw new Error('Phòng đã bắt đầu hoặc đã đầy');
     return r;
   }
   if (msg.create) {
@@ -49,7 +49,7 @@ async function pickRoom(c, msg) {
     return r;
   }
   // ghép phòng công khai: phòng đông nhất chưa đầy
-  const open = mine.filter(r => !r.code && !r.full).sort((a, b) => b.clients.size - a.clients.size)[0];
+  const open = mine.filter(r => !r.code && !r.full && r.acceptsNewPlayers?.() !== false).sort((a, b) => b.clients.size - a.clients.size)[0];
   if (open) return open;
   const r = new Cls({ game: g, kind: mp.mode, code: null, maxPlayers: mp.maxPlayers, manager: module.exports });
   rooms.set(r.id, r);

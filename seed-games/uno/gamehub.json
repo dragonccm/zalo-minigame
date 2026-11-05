@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "id": "uno",
+  "name": "UNO Sắc Màu",
+  "version": "1.1.4",
+  "description": "Bài UNO cổ điển: chơi với máy hoặc 2–4 người online, đánh theo màu và số, gọi UNO, khiếu nại +4.",
+  "author": "GameHub",
+  "sdk": "1.0",
+  "entry": "index.html",
+  "thumbnail": "thumb.png",
+  "categories": ["board", "strategy"],
+  "orientation": "both",
+  "controls": ["mouse", "touch"],
+  "permissions": ["save", "leaderboard", "achievements", "multiplayer"],
+  "scoring": { "label": "Điểm UNO", "order": "desc", "max": 5000 },
+  "multiplayer": { "mode": "authoritative", "maxPlayers": 4, "minPlayers": 2, "privateRooms": true },
+  "achievements": [
+    { "key": "first_win", "name": "Hết bài đầu tiên", "description": "Thắng một vòng UNO", "icon": "trophy", "points": 10 },
+    { "key": "online_win", "name": "Bậc thầy sắc màu", "description": "Thắng một vòng UNO online", "icon": "medal", "points": 20 }
+  ]
+}
